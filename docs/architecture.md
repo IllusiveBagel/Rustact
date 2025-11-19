@@ -5,7 +5,6 @@ Rustact is a React-inspired framework for building asynchronous terminal UIs on 
 ## Quick start
 
 ```bash
-cd /home/logan/git/rustact
 cargo run
 ```
 
