@@ -16,6 +16,7 @@ use crate::events::{DEFAULT_TICK_RATE, EventBus, FrameworkEvent, is_ctrl_c, map_
 use crate::hooks::{EffectInvocation, HookRegistry, Scope};
 use crate::renderer::Renderer;
 use crate::styles::Stylesheet;
+use crate::text_input::{TextInputHandle, TextInputs};
 
 #[derive(Clone)]
 pub struct App {
@@ -103,6 +104,7 @@ impl App {
                     self.hooks.prune(&live_components);
                 }
                 AppMessage::ExternalEvent(event) => {
+                    TextInputs::handle_event(&event, &dispatcher);
                     self.event_bus.publish(event);
                 }
                 AppMessage::Shutdown => break,
@@ -268,6 +270,31 @@ impl App {
                     title: node.title,
                     fields,
                     label_width: node.label_width,
+                })))
+            }
+            Element::Input(node) => {
+                let snapshot = node.binding.snapshot();
+                let id = (*snapshot.id).clone();
+                let focused = TextInputs::is_focused(&id);
+                let cursor_visible = TextInputs::cursor_visible(&id);
+                let status = snapshot.status.unwrap_or(node.status);
+                Ok(Some(View::Input(TextInputView {
+                    id,
+                    label: node.label,
+                    value: snapshot.value,
+                    placeholder: node.placeholder,
+                    width: node.width,
+                    focused,
+                    cursor: snapshot.cursor,
+                    secure: node.secure,
+                    accent: node.accent,
+                    border_color: node.border_color,
+                    text_color: node.text_color,
+                    placeholder_color: node.placeholder_color,
+                    background_color: node.background_color,
+                    focus_background: node.focus_background,
+                    status,
+                    cursor_visible,
                 })))
             }
             Element::Fragment(children) => {
@@ -476,6 +503,7 @@ pub enum Element {
     Table(TableNode),
     Tree(TreeNode),
     Form(FormNode),
+    Input(TextInputNode),
     Fragment(Vec<Element>),
     Component(ComponentElement),
 }
@@ -510,6 +538,7 @@ pub enum View {
     Table(TableView),
     Tree(TreeView),
     Form(FormView),
+    Input(TextInputView),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -609,6 +638,26 @@ pub struct FormFieldView {
     pub status: FormFieldStatus,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct TextInputView {
+    pub id: String,
+    pub label: Option<String>,
+    pub value: String,
+    pub placeholder: Option<String>,
+    pub width: Option<u16>,
+    pub focused: bool,
+    pub cursor: usize,
+    pub secure: bool,
+    pub accent: Option<Color>,
+    pub border_color: Option<Color>,
+    pub text_color: Option<Color>,
+    pub placeholder_color: Option<Color>,
+    pub background_color: Option<Color>,
+    pub focus_background: Option<Color>,
+    pub status: FormFieldStatus,
+    pub cursor_visible: bool,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FlexDirection {
     Row,
@@ -677,6 +726,10 @@ impl Element {
 
     pub fn form(node: FormNode) -> Self {
         Element::Form(node)
+    }
+
+    pub fn text_input(node: TextInputNode) -> Self {
+        Element::Input(node)
     }
 }
 
@@ -995,6 +1048,96 @@ pub enum FormFieldStatus {
     Warning,
     Error,
     Success,
+}
+
+#[derive(Clone, Debug)]
+pub struct TextInputNode {
+    pub binding: TextInputHandle,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub width: Option<u16>,
+    pub secure: bool,
+    pub accent: Option<Color>,
+    pub border_color: Option<Color>,
+    pub text_color: Option<Color>,
+    pub placeholder_color: Option<Color>,
+    pub background_color: Option<Color>,
+    pub focus_background: Option<Color>,
+    pub status: FormFieldStatus,
+}
+
+impl TextInputNode {
+    pub fn new(binding: TextInputHandle) -> Self {
+        Self {
+            binding,
+            label: None,
+            placeholder: None,
+            width: None,
+            secure: false,
+            accent: None,
+            border_color: None,
+            text_color: None,
+            placeholder_color: None,
+            background_color: None,
+            focus_background: None,
+            status: FormFieldStatus::Normal,
+        }
+    }
+
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
+        self
+    }
+
+    pub fn placeholder(mut self, placeholder: impl Into<String>) -> Self {
+        self.placeholder = Some(placeholder.into());
+        self
+    }
+
+    pub fn width(mut self, width: u16) -> Self {
+        self.width = Some(width);
+        self
+    }
+
+    pub fn secure(mut self, secure: bool) -> Self {
+        self.secure = secure;
+        self
+    }
+
+    pub fn accent(mut self, color: Color) -> Self {
+        self.accent = Some(color);
+        self
+    }
+
+    pub fn border_color(mut self, color: Color) -> Self {
+        self.border_color = Some(color);
+        self
+    }
+
+    pub fn text_color(mut self, color: Color) -> Self {
+        self.text_color = Some(color);
+        self
+    }
+
+    pub fn placeholder_color(mut self, color: Color) -> Self {
+        self.placeholder_color = Some(color);
+        self
+    }
+
+    pub fn background_color(mut self, color: Color) -> Self {
+        self.background_color = Some(color);
+        self
+    }
+
+    pub fn focus_background(mut self, color: Color) -> Self {
+        self.focus_background = Some(color);
+        self
+    }
+
+    pub fn status(mut self, status: FormFieldStatus) -> Self {
+        self.status = status;
+        self
+    }
 }
 
 fn flatten_tree_items(items: Vec<TreeItemNode>) -> Vec<TreeRowView> {

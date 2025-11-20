@@ -5,8 +5,8 @@ use crossterm::event::KeyCode;
 use crossterm::event::MouseButton;
 use tokio::sync::broadcast::error::RecvError;
 
-use rustact::runtime::{AppConfig, Color};
-use rustact::styles::{StyleQuery, Stylesheet};
+use rustact::runtime::{AppConfig, Color, TextInputNode};
+use rustact::styles::{ComputedStyle, StyleQuery, Stylesheet};
 use rustact::{
     App, ButtonNode, Element, FormFieldNode, FormFieldStatus, FormNode, FrameworkEvent, GaugeNode,
     ListItemNode, ListNode, Scope, TableCellNode, TableNode, TableRowNode, TreeItemNode, TreeNode,
@@ -23,6 +23,9 @@ const COUNTER_PANEL_ID: &str = "counter";
 const STATS_LIST_ID: &str = "stats";
 const SERVICES_TABLE_ID: &str = "services";
 const RELEASE_FORM_ID: &str = "release";
+const FEEDBACK_NAME_INPUT: &str = "feedback-name";
+const FEEDBACK_EMAIL_INPUT: &str = "feedback-email";
+const FEEDBACK_TOKEN_INPUT: &str = "feedback-token";
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -61,6 +64,7 @@ fn app_root(ctx: &mut Scope) -> Element {
             Element::hstack(vec![
                 component("Events", event_log).into(),
                 component("Config", config_form).into(),
+                component("Feedback", feedback_panel).into(),
             ]),
         ]),
     )
@@ -445,6 +449,133 @@ fn config_form(ctx: &mut Scope) -> Element {
         .title("Release checklist")
         .label_width(label_width);
     Element::block("Config", Element::form(form))
+}
+
+fn feedback_panel(ctx: &mut Scope) -> Element {
+    let theme = ctx
+        .use_context::<Theme>()
+        .map(|theme| theme.clone())
+        .unwrap_or_default();
+    let name_input = ctx.use_text_input(FEEDBACK_NAME_INPUT, || "Rusty User".to_string());
+    let email_input = ctx.use_text_input(FEEDBACK_EMAIL_INPUT, String::new);
+    let token_input = ctx.use_text_input(FEEDBACK_TOKEN_INPUT, String::new);
+
+    let name_status_kind = ctx.use_text_input_validation(&name_input, |snapshot| {
+        if snapshot.value.trim().is_empty() {
+            FormFieldStatus::Warning
+        } else {
+            FormFieldStatus::Success
+        }
+    });
+    let email_status_kind = ctx.use_text_input_validation(&email_input, |snapshot| {
+        let trimmed = snapshot.value.trim();
+        if trimmed.is_empty() {
+            FormFieldStatus::Normal
+        } else if trimmed.contains('@') {
+            FormFieldStatus::Success
+        } else {
+            FormFieldStatus::Error
+        }
+    });
+    let token_status_kind = ctx.use_text_input_validation(&token_input, |snapshot| {
+        if snapshot.value.is_empty() {
+            FormFieldStatus::Warning
+        } else {
+            FormFieldStatus::Success
+        }
+    });
+
+    let name_snapshot = name_input.snapshot();
+    let email_snapshot = email_input.snapshot();
+    let token_snapshot = token_input.snapshot();
+
+    let input_style = |id: &str| ctx.styles().query(StyleQuery::element("input").with_id(id));
+    let style_input = |mut node: TextInputNode, styles: &ComputedStyle| {
+        if let Some(color) = styles.color("accent-color") {
+            node = node.accent(color);
+        }
+        if let Some(color) = styles.color("--border-color") {
+            node = node.border_color(color);
+        }
+        if let Some(color) = styles.color("color") {
+            node = node.text_color(color);
+        }
+        if let Some(color) = styles.color("--placeholder-color") {
+            node = node.placeholder_color(color);
+        }
+        if let Some(color) = styles.color("--background-color") {
+            node = node.background_color(color);
+        }
+        if let Some(color) = styles.color("--focus-background") {
+            node = node.focus_background(color);
+        }
+        node
+    };
+
+    let name_status = match name_status_kind {
+        FormFieldStatus::Warning => {
+            "Type your display name above to personalize the message.".to_string()
+        }
+        _ => format!(
+            "Hello, {}! ({} chars)",
+            name_snapshot.value.trim(),
+            name_snapshot.value.chars().count()
+        ),
+    };
+    let email_trimmed = email_snapshot.value.trim();
+    let email_status = match email_status_kind {
+        FormFieldStatus::Normal => "Add an email to receive follow-ups.".to_string(),
+        FormFieldStatus::Success => format!("We will follow up at {}.", email_trimmed),
+        FormFieldStatus::Error => format!("\"{}\" doesn't look like an email.", email_trimmed),
+        _ => String::new(),
+    };
+    let token_status = match token_status_kind {
+        FormFieldStatus::Warning => "API token not provided.".to_string(),
+        _ => format!(
+            "Captured token length: {} chars.",
+            token_snapshot.value.chars().count()
+        ),
+    };
+
+    let name_styles = input_style(FEEDBACK_NAME_INPUT);
+    let email_styles = input_style(FEEDBACK_EMAIL_INPUT);
+    let token_styles = input_style(FEEDBACK_TOKEN_INPUT);
+
+    let name_field = style_input(
+        TextInputNode::new(name_input.clone())
+            .label("Display name")
+            .placeholder("Rustacean in Residence")
+            .width(32)
+            .accent(theme.accent),
+        &name_styles,
+    );
+    let email_field = style_input(
+        TextInputNode::new(email_input.clone())
+            .label("Email (optional)")
+            .placeholder("dev@example.com")
+            .width(36),
+        &email_styles,
+    );
+    let token_field = style_input(
+        TextInputNode::new(token_input.clone())
+            .label("API token")
+            .placeholder("Optional secret")
+            .secure(true)
+            .width(36)
+            .accent(theme.warning),
+        &token_styles,
+    );
+
+    Element::block(
+        "Feedback",
+        Element::vstack(vec![
+            Element::text("Try the new text inputs:"),
+            Element::text_input(name_field),
+            Element::text_input(email_field),
+            Element::text_input(token_field),
+            Element::text(format!("{name_status} {email_status} {token_status}")),
+        ]),
+    )
 }
 
 fn tips_panel(ctx: &mut Scope) -> Element {

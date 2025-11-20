@@ -43,9 +43,14 @@ The demo stylesheet (`styles/demo.css`) illustrates the selectors Rustact curren
 | `list#stats` | Recent events list. | `color`, `--highlight-color`, `--max-items` |
 | `table#services` | Service health table. | `--column-widths` |
 | `form#release` | Release checklist form. | `--label-width` |
+| `input`, `input#feedback-name` | Text inputs (global + per-field overrides). | `accent-color`, `--border-color`, `color`, `--placeholder-color`, `--background-color`, `--focus-background` |
 | `tip.keyboard`, `tip.mouse`, `tip.context` | Tip cards keyed by class. | `color` |
 
 Add your own selectors and query them inside components by calling `ctx.styles().query(StyleQuery::element("element").with_id("id").with_classes(&classes))`.
+
+Text inputs follow the same pattern as other widgets: query `input` selectors (optionally with an `#id`) and feed the computed colors into `TextInputNode` builder methods like `.accent(...)`, `.border_color(...)`, `.background_color(...)`, or `.placeholder_color(...)`. The renderer consumes those values to drive focus borders, cursor color, and placeholder contrast.
+
+Validation logic can tint those inputs by pushing a [`FormFieldStatus`](../src/runtime/mod.rs) into the binding. Call `ctx.use_text_input_validation(&handle, |snapshot| { ... })` to derive a status from the current value, or invoke `handle.set_status(FormFieldStatus::Error)` directly when performing asynchronous checks. The renderer prefers the dynamic status over the static `.status(...)` builder setting, so validation hooks immediately impact border and label colors.
 
 ## Example stylesheet
 

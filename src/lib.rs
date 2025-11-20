@@ -5,6 +5,7 @@ mod interactions;
 pub mod renderer;
 pub mod runtime;
 pub mod styles;
+pub mod text_input;
 
 pub use events::{FrameworkEvent, is_ctrl_c, is_mouse_click, mouse_position, mouse_scroll_delta};
 pub use hooks::{ReducerDispatch, RefHandle, Scope, StateHandle};
@@ -15,3 +16,4 @@ pub use runtime::{
     TableNode, TableRowNode, TreeItemNode, TreeNode, View, component,
 };
 pub use styles::{ComputedStyle, StyleQuery, Stylesheet};
+pub use text_input::{TextInputHandle, TextInputState};

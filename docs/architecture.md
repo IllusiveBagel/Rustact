@@ -72,6 +72,7 @@ let app = App::new("HeroDemo", component("Hero", hero));
 - `Element::table(TableNode)` for multi-column data grids rendered through `ratatui::widgets::Table`.
 - `Element::tree(TreeNode)` for hierarchical explorers that render as indented lists.
 - `Element::form(FormNode)` for key/value summaries with validation-aware styling.
+- `Element::text_input(TextInputNode)` for focusable, styled, and optionally secure fields bound to component state.
 - `Element::fragment` for lightweight wrappers without their own view node.
 - `component("Name", render_fn)` to embed another component in the tree.
 
@@ -235,6 +236,53 @@ let seen = total_events.with(|count| *count);
 Element::text(format!("Events processed: {seen}"));
 ```
 
+### `use_text_input`
+
+`use_text_input` registers a focusable binding that keeps text input state outside of component re-renders. The returned `TextInputHandle` exposes helpers such as `value()`, `set_value()`, `cursor()`, `set_cursor()`, `focus()`, and `snapshot()` for downstream hooks or effects.
+
+```rust
+let token = ctx.use_text_input("feedback:token", String::new);
+let token_field = TextInputNode::new(token.clone())
+    .label("API token")
+    .placeholder("Optional secret")
+    .secure(true)
+    .width(36)
+    .accent(Color::Yellow);
+
+Element::text_input(token_field);
+```
+
+The shared `TextInputs` registry tracks hitboxes, so clicking anywhere inside the field focuses it, and Tab/Shift+Tab move through inputs in declaration order. Focused fields display a blinking caret, and secure inputs render placeholder glyphs instead of the raw value.
+
+### `use_text_input_validation`
+
+Pair `use_text_input` with `use_text_input_validation` to derive `FormFieldStatus` values that drive border and helper-text styling.
+
+```rust
+let email = ctx.use_text_input("feedback:email", String::new);
+let email_status = ctx.use_text_input_validation(&email, |snapshot| {
+    let trimmed = snapshot.value.trim();
+    if trimmed.is_empty() {
+        FormFieldStatus::Normal
+    } else if trimmed.contains('@') {
+        FormFieldStatus::Success
+    } else {
+        FormFieldStatus::Error
+    }
+});
+
+Element::text_input(TextInputNode::new(email).status(email_status));
+```
+
+The hook stores the computed status on the handle so the runtime and renderer prefer it over any static `.status(...)` assigned to the node. You can also call `handle.set_status(...)` or `handle.clear_status()` manually—for example, after an async availability check completes.
+
+### Text input lifecycle
+
+- **Rendering**: `TextInputNode` carries styling (accent/border/text/placeholder/focus colors), layout (`width`, labels), and secure mode flags. During reconciliation the runtime clones a `TextInputSnapshot` so validation logic can read the value, cursor offset, and latest status.
+- **Focus & cursor**: The `TextInputs` singleton stores hitboxes each frame. Mouse clicks toggle focus, Tab cycles between registered IDs, and a 250ms tick flips a shared `cursor_visible` flag to create a blinking caret. Blurs hide the caret.
+- **Status coloring**: The renderer calls `status_to_color` to map `FormFieldStatus::{Normal,Warning,Error,Success}` into accent colors used for the border, label, and cursor. Live statuses from validation hooks immediately change those colors without rebuilding the node.
+- **Secure mode**: `.secure(true)` masks the value when painting, but snapshots still expose the underlying text so validation or submission logic can operate on the same data.
+
 ## Events & dispatcher
 
 `EventBus` is a Tokio `broadcast::channel` shared across the runtime. Every keyboard, mouse, resize, and tick event is published as a `FrameworkEvent`. `Ctrl+C` is detected in `events::is_ctrl_c` and triggers an app shutdown.
@@ -250,7 +298,7 @@ The demo’s counter listens for `KeyCode::Char('+')`, `'-'`, and `r`, updating 
 `App::run` (in `src/runtime/mod.rs`):
 
 1. Spawns three async tasks:
-   - `spawn_terminal_events` – wraps `crossterm::event::EventStream`, converts to `FrameworkEvent`, and issues `AppMessage::ExternalEvent`. Detects Ctrl+C and requests shutdown.
+    - `spawn_terminal_events` – wraps `crossterm::event::EventStream`, converts to `FrameworkEvent`, and issues `AppMessage::ExternalEvent`. Detects Ctrl+C, routes mouse clicks into the button/input hitbox registries, and requests shutdown.
    - `spawn_tick_loop` – emits `FrameworkEvent::Tick` at `AppConfig::tick_rate` (default 250ms).
    - `spawn_shutdown_watcher` – listens for OS-level `tokio::signal::ctrl_c` as a fallback.
 2. Enters an `mpsc::Receiver<AppMessage>` loop. On `RequestRender`:
@@ -267,7 +315,8 @@ The demo’s counter listens for `KeyCode::Char('+')`, `'-'`, and `r`, updating 
 
 `src/renderer/mod.rs` adapts a `View` tree to `ratatui` widgets:
 - Enters alternate screen, hides cursor, enables mouse capture.
-- Recursively renders views using `Layout` for flex nodes, `Paragraph` for text, `List`/`ListState` for feeds, and `Gauge` for progress bars.
+- Recursively renders views using `Layout` for flex nodes, `Paragraph` for text, `List`/`ListState` for feeds, `Gauge` for progress bars, `Table`/`Tree` widgets for structured data, and a custom `TextInputWidget` that draws labels, placeholders, secure glyphs, focus backgrounds, borders, and the blinking caret.
+- Registers hitboxes for every button and input so later mouse events can be matched back to view IDs.
 - `Drop` impl restores the terminal (disables raw mode, leaves alt screen).
 
 This layer is intentionally tiny so you can swap in richer widgets or adopt another backend later.

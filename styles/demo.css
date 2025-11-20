@@ -56,3 +56,26 @@ tip.mouse {
 tip.context {
   color: #7bd88f;
 }
+
+input {
+  accent-color: #00e8ff;
+  --border-color: #4b5563;
+  --placeholder-color: #7c8dab;
+  --background-color: #101522;
+  --focus-background: #182032;
+}
+
+input#feedback-name {
+  accent-color: #7bd88f;
+}
+
+input#feedback-email {
+  accent-color: #7dd3fc;
+  --border-color: #2f3a4f;
+}
+
+input#feedback-token {
+  accent-color: #ffb347;
+  --background-color: #1a1410;
+  --focus-background: #2b1c11;
+}

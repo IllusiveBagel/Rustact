@@ -5,8 +5,9 @@ use std::sync::Arc;
 use parking_lot::Mutex;
 
 use crate::context::{ContextGuard, ContextStack};
-use crate::runtime::{ComponentId, Dispatcher};
+use crate::runtime::{ComponentId, Dispatcher, FormFieldStatus};
 use crate::styles::Stylesheet;
+use crate::text_input::{TextInputHandle, TextInputSnapshot, TextInputs};
 
 type AnySlot = dyn Any + Send + Sync;
 type ReducerFn<S, A> = dyn Fn(&mut S, A) + Send + Sync + 'static;
@@ -79,10 +80,18 @@ impl HookStore {
 
     pub fn drain(&mut self) {
         for slot in &mut self.slots {
-            if let HookSlot::Effect(effect) = slot {
-                if let Some(cleanup) = effect.cleanup.take() {
-                    cleanup();
+            match slot {
+                HookSlot::Effect(effect) => {
+                    if let Some(cleanup) = effect.cleanup.take() {
+                        cleanup();
+                    }
                 }
+                HookSlot::TextInput(entry) => {
+                    if let Some(binding) = entry.downcast_mut::<TextInputEntry>() {
+                        binding.release();
+                    }
+                }
+                _ => {}
             }
         }
         self.slots.clear();
@@ -96,6 +105,7 @@ enum HookSlot {
     Memo(Box<AnySlot>),
     Reducer(Box<AnySlot>),
     RefCell(Box<AnySlot>),
+    TextInput(Box<AnySlot>),
 }
 
 impl Default for HookSlot {
@@ -325,6 +335,49 @@ impl<'a> Scope<'a> {
         RefHandle::new(shared)
     }
 
+    pub fn use_text_input<F>(&mut self, id: impl Into<String>, init: F) -> TextInputHandle
+    where
+        F: FnOnce() -> String,
+    {
+        let index = self.next_index();
+        let id = id.into();
+        let dispatcher = self.dispatcher.clone();
+        let handle = {
+            let mut store = self.store.lock();
+            let slot = store.slot(index);
+            match slot {
+                HookSlot::Vacant => {
+                    let handle = TextInputHandle::new(id.clone(), init(), dispatcher);
+                    *slot = HookSlot::TextInput(Box::new(TextInputEntry::new(id, handle.clone())));
+                    handle
+                }
+                HookSlot::TextInput(entry) => {
+                    let entry = entry
+                        .downcast_mut::<TextInputEntry>()
+                        .expect("use_text_input hook order mismatch");
+                    entry.ensure_id(&id);
+                    entry.handle()
+                }
+                _ => panic!("use_text_input hook order mismatch"),
+            }
+        };
+        handle
+    }
+
+    pub fn use_text_input_validation<F>(
+        &mut self,
+        handle: &TextInputHandle,
+        validator: F,
+    ) -> FormFieldStatus
+    where
+        F: Fn(&TextInputSnapshot) -> FormFieldStatus,
+    {
+        let snapshot = handle.snapshot();
+        let status = validator(&snapshot);
+        handle.set_status(status);
+        status
+    }
+
     pub fn dispatcher(&self) -> &Dispatcher {
         &self.dispatcher
     }
@@ -451,6 +504,37 @@ struct RefEntry<T: Send + 'static> {
 impl<T: Send + 'static> RefEntry<T> {
     fn new(handle: Arc<Mutex<T>>) -> Self {
         Self { handle }
+    }
+}
+
+struct TextInputEntry {
+    id: String,
+    handle: TextInputHandle,
+}
+
+impl TextInputEntry {
+    fn new(id: String, handle: TextInputHandle) -> Self {
+        Self { id, handle }
+    }
+
+    fn release(&mut self) {
+        if !self.id.is_empty() {
+            TextInputs::unregister_binding(&self.id);
+            self.id.clear();
+        }
+    }
+
+    fn handle(&self) -> TextInputHandle {
+        self.handle.clone()
+    }
+
+    fn ensure_id(&self, id: &str) {
+        if self.id != id {
+            panic!(
+                "use_text_input hook ID mismatch: expected {}, received {}",
+                self.id, id
+            );
+        }
     }
 }
 
