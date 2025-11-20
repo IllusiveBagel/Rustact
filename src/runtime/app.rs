@@ -15,7 +15,7 @@ use crate::text_input::TextInputs;
 use super::component::{ComponentElement, ComponentId};
 use super::dispatcher::{AppMessage, Dispatcher};
 use super::element::{Element, FlexDirection, TreeItemNode};
-use super::tasks::{spawn_shutdown_watcher, spawn_terminal_events, spawn_tick_loop};
+use super::tasks::{DefaultRuntimeDriver, RuntimeDriver};
 use super::view::{
     BlockView, ButtonView, FlexView, FormFieldView, FormView, GaugeView, ListItemView, ListView,
     TableCellView, TableRowView, TableView, TextInputView, TextView, TreeRowView, TreeView, View,
@@ -29,6 +29,7 @@ pub struct App {
     event_bus: EventBus,
     config: AppConfig,
     styles: Arc<Stylesheet>,
+    driver: Arc<dyn RuntimeDriver>,
 }
 
 #[derive(Clone, Copy)]
@@ -53,6 +54,7 @@ impl App {
             event_bus: EventBus::new(64),
             config: AppConfig::default(),
             styles: Arc::new(Stylesheet::default()),
+            driver: Arc::new(DefaultRuntimeDriver::default()),
         }
     }
 
@@ -66,15 +68,25 @@ impl App {
         self
     }
 
+    pub fn with_driver<D>(mut self, driver: D) -> Self
+    where
+        D: RuntimeDriver + 'static,
+    {
+        self.driver = Arc::new(driver);
+        self
+    }
+
     pub async fn run(self) -> anyhow::Result<()> {
         let (tx, mut rx) = mpsc::channel(128);
         let dispatcher = Dispatcher::new(tx.clone(), self.event_bus.clone());
         let mut renderer = Renderer::new(self.name).context("initialize renderer")?;
         let mut last_view: Option<View> = None;
 
-        let event_task = spawn_terminal_events(tx.clone());
-        let tick_task = spawn_tick_loop(tx.clone(), self.config.tick_rate);
-        let shutdown_task = spawn_shutdown_watcher(tx.clone());
+        let event_task = self.driver.spawn_terminal_events(tx.clone());
+        let tick_task = self
+            .driver
+            .spawn_tick_loop(tx.clone(), self.config.tick_rate);
+        let shutdown_task = self.driver.spawn_shutdown_watcher(tx.clone());
 
         tx.send(AppMessage::RequestRender).await.ok();
         let mut live_components = HashSet::new();

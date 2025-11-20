@@ -1,6 +1,8 @@
 use super::*;
-use crossterm::event::{Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers, MouseButton,
-                       MouseEvent, MouseEventKind};
+use crossterm::event::{
+    Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers, MouseButton, MouseEvent,
+    MouseEventKind,
+};
 
 #[test]
 fn map_terminal_event_converts_supported_inputs() {

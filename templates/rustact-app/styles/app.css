@@ -1,0 +1,21 @@
+:root {
+  --accent-color: #00e8ff;
+  --warning-color: #f7b801;
+  --success-color: #7bd88f;
+}
+
+button#counter-plus {
+  accent-color: #00e8ff;
+  --filled: true;
+}
+
+button#counter-minus {
+  accent-color: #ff6b6b;
+}
+
+input#profile\:name {
+  accent-color: #00e8ff;
+  --border-color: #00e8ff;
+  --background-color: #001b2d;
+  --placeholder-color: #3a506b;
+}

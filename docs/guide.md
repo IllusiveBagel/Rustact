@@ -90,6 +90,19 @@ Scope exposes additional helpers (`dispatcher`, `styles`, `use_text_input_valida
 - Query inside components with `ctx.styles().query(StyleQuery::element("button").with_id("counter-plus"))`.
 - See `docs/styling.md` for supported selectors, properties, and examples.
 
+## 8. Project template
+
+Bootstrap a fresh app using the bundled `cargo generate` template once published:
+
+```bash
+cargo install cargo-generate
+cargo generate --git https://github.com/IllusiveBagel/rustact --name my-app --template rustact-app
+cd my-app
+cargo run
+```
+
+The template lives under `templates/rustact-app/` and includes a sample component, stylesheet, and README. Adjust `docs/template.md` as you evolve the scaffold.
+
 ## 8. Testing & troubleshooting
 
 - Use `cargo test module::tests::name` to focus on a failing spec.
@@ -105,3 +118,41 @@ Scope exposes additional helpers (`dispatcher`, `styles`, `use_text_input_valida
 - Tutorial: `docs/tutorial.md` (below) to build a fresh app from scratch.
 
 Keep this guide nearby while contributing; update it whenever you add new workflows, commands, or conceptual primitives.
+
+## 10. Custom runtime drivers
+
+The runtime now accepts pluggable drivers for the terminal/tick/shutdown tasks. Implement the `RuntimeDriver` trait (from `rustact::runtime`) and pass it to `App::with_driver(...)` to swap in mocks or alternate IO sources.
+
+```rust
+use std::time::Duration;
+use tokio::sync::mpsc;
+use tokio::task::JoinHandle;
+
+use rustact::runtime::{component, App, Element, RuntimeDriver};
+use rustact::runtime::dispatcher::AppMessage;
+
+#[derive(Clone)]
+struct TestDriver;
+
+impl RuntimeDriver for TestDriver {
+	fn spawn_terminal_events(&self, tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
+		tokio::spawn(async move {
+			// Immediately request shutdown in tests.
+			let _ = tx.send(AppMessage::Shutdown).await;
+		})
+	}
+
+	fn spawn_tick_loop(&self, _tx: mpsc::Sender<AppMessage>, _rate: Duration) -> JoinHandle<()> {
+		tokio::spawn(async {})
+	}
+
+	fn spawn_shutdown_watcher(&self, _tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
+		tokio::spawn(async {})
+	}
+}
+
+let app = App::new("Testable", component("Unit", |_ctx| Element::Empty))
+	.with_driver(TestDriver);
+```
+
+This makes `App::run()` deterministic under `cargo test`, unlocks headless integration drivers, and keeps the production behavior intact via the default driver (`DefaultRuntimeDriver`).

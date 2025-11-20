@@ -4,17 +4,16 @@ This document captures the current state of the project and highlights the most 
 
 ## 1. Developer Experience & Documentation
 
-- Expand `README.md` into a structured guide under `docs/`, covering setup, component patterns, hook reference, and architecture overview.
-- Add a "Quick Start" tutorial (e.g., `docs/tutorial.md`) that walks through building and styling a minimal app end-to-end.
-- Publish comprehensive API docs via `cargo doc --open` guidance, and consider hosting them with GitHub Pages.
-- Explore a `cargo generate` template or starter repo to bootstrap new Rustact apps with sensible defaults.
+- ✅ Expanded `README.md` with a documentation index and authored `docs/guide.md` (developer workflows) plus `docs/tutorial.md` (quick-start app walkthrough).
+- ✅ Added `docs/api-docs.md` with publishing guidance (`cargo doc` + GitHub Pages workflow) and linked it from the README.
+- ✅ Added `templates/rustact-app/` plus documentation (`docs/template.md`) outlining usage; template is consumable today via `cargo generate --git https://github.com/IllusiveBagel/rustact --branch main --path templates/rustact-app`.
 
 ## 2. Runtime Ergonomics & Reliability
 
-- Abstract the terminal/tick/shutdown tasks behind traits so the event loop is unit-testable without `crossterm`.
+- ✅ Abstracted the terminal/tick/shutdown tasks behind the `RuntimeDriver` trait; `App::with_driver` now injects mocks for deterministic tests (see `runtime/tests/app.rs`).
 - Improve shutdown handling: propagate errors from renderer/effect tasks, surface panics, and ensure terminal state is restored on exit.
 - Provide structured logging (e.g., `tracing`) around renders, effects, and dispatched events for easier debugging.
-- Offer feature flags to opt into mock drivers for deterministic integration tests.
+- Update: driver injection covers mock needs; revisit feature flags once additional drivers (e.g., headless) land.
 
 ## 3. Feature Depth & Showcase Apps
 

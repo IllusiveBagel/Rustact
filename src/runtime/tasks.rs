@@ -10,7 +10,30 @@ use crate::events::{FrameworkEvent, is_ctrl_c, map_terminal_event};
 
 use super::dispatcher::AppMessage;
 
-pub fn spawn_terminal_events(tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
+pub trait RuntimeDriver: Send + Sync {
+    fn spawn_terminal_events(&self, tx: mpsc::Sender<AppMessage>) -> JoinHandle<()>;
+    fn spawn_tick_loop(&self, tx: mpsc::Sender<AppMessage>, rate: Duration) -> JoinHandle<()>;
+    fn spawn_shutdown_watcher(&self, tx: mpsc::Sender<AppMessage>) -> JoinHandle<()>;
+}
+
+#[derive(Default)]
+pub struct DefaultRuntimeDriver;
+
+impl RuntimeDriver for DefaultRuntimeDriver {
+    fn spawn_terminal_events(&self, tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
+        spawn_terminal_events(tx)
+    }
+
+    fn spawn_tick_loop(&self, tx: mpsc::Sender<AppMessage>, rate: Duration) -> JoinHandle<()> {
+        spawn_tick_loop(tx, rate)
+    }
+
+    fn spawn_shutdown_watcher(&self, tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
+        spawn_shutdown_watcher(tx)
+    }
+}
+
+fn spawn_terminal_events(tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
     tokio::spawn(async move {
         let mut events = EventStream::new();
         while let Some(event) = events.next().await {
@@ -33,7 +56,7 @@ pub fn spawn_terminal_events(tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
     })
 }
 
-pub fn spawn_tick_loop(tx: mpsc::Sender<AppMessage>, rate: Duration) -> JoinHandle<()> {
+fn spawn_tick_loop(tx: mpsc::Sender<AppMessage>, rate: Duration) -> JoinHandle<()> {
     tokio::spawn(async move {
         let mut ticker = tokio::time::interval(rate);
         loop {
@@ -49,7 +72,7 @@ pub fn spawn_tick_loop(tx: mpsc::Sender<AppMessage>, rate: Duration) -> JoinHand
     })
 }
 
-pub fn spawn_shutdown_watcher(tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
+fn spawn_shutdown_watcher(tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
     tokio::spawn(async move {
         if signal::ctrl_c().await.is_ok() {
             let _ = tx.send(AppMessage::Shutdown).await;

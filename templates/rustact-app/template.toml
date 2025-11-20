@@ -1,0 +1,15 @@
+[template]
+description = "Starter template for building a Rustact terminal UI"
+maintainer = "IllusiveBagel"
+license = "MIT"
+repository = "https://github.com/IllusiveBagel/rustact"
+
+[placeholders.app_description]
+type = "string"
+prompt = "App description"
+default = "A fresh Rustact terminal UI"
+
+[placeholders.author_name]
+type = "string"
+prompt = "Author name"
+default = "Rustacean"

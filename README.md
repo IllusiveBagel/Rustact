@@ -6,6 +6,7 @@ Rustact is an experimental, React-inspired framework for building async terminal
 
 - **Component tree & hooks** – Define components via `component("Name", |ctx| ...)` and manage state with `use_state`, `use_reducer`, `use_ref`, `use_effect`, `use_memo`, `use_callback`, and `provide_context` / `use_context`.
 - **Async runtime** – Built on `tokio`, handling terminal IO, ticks, and effect scheduling without blocking the UI thread.
+- **Injectable runtime drivers** – Swap the event/tick/shutdown drivers with `App::with_driver(...)` for deterministic tests or custom IO sources.
 - **Event bus** – Subscribe to keyboard/mouse/resize/tick events via `ctx.dispatcher().events().subscribe()` and react within hooks or spawned tasks.
 - **Ratatui renderer** – Converts the virtual tree into `ratatui` widgets, handling layout primitives like blocks, vertical/horizontal stacks, styled text, list panels, gauges, tables, tree views, forms, and rich text inputs.
 - **View diffing** – The runtime caches the previous view tree and skips terminal draws when nothing has changed, keeping renders snappy even with frequent ticks.
@@ -21,6 +22,30 @@ Rustact is an experimental, React-inspired framework for building async terminal
 - `docs/architecture.md` – deep dive into the runtime, hooks, renderer, and events.
 - `docs/styling.md` – CSS subset reference and theming tips.
 - `docs/roadmap.md` – prioritized initiatives to steer ongoing work.
+- `docs/api-docs.md` – publishing instructions for hosting `cargo doc` output.
+- `docs/template.md` – outline for the upcoming `cargo generate` starter template.
+- `templates/rustact-app/` – ready-to-use project scaffold consumable via `cargo generate`.
+
+## Starter template
+
+Spin up a fresh app via [`cargo-generate`](https://github.com/cargo-generate/cargo-generate):
+
+```bash
+cargo install cargo-generate
+cargo generate \
+    --git https://github.com/IllusiveBagel/rustact \
+    --branch main \
+    --path templates/rustact-app \
+    --name my-rustact-app
+cd my-rustact-app
+cargo run
+```
+
+The template mirrors the demo’s patterns (hooks, dispatcher events, text inputs) plus a default stylesheet and README.
+
+## API docs hosting
+
+The workflow `.github/workflows/publish-docs.yml` builds `cargo doc --no-deps` on every push to `main` and deploys the result via GitHub Pages. Enable Pages → "GitHub Actions" in repo settings to activate it. Manual steps and customization tips live in `docs/api-docs.md`.
 
 ## Running the demo
 

@@ -1,0 +1,12 @@
+[package]
+name = "{{ project-name }}"
+version = "0.1.0"
+edition = "2024"
+authors = ["{{ author_name }}"]
+description = "{{ app_description }}"
+
+[dependencies]
+anyhow = "1"
+ratatui = { version = "0.26", default-features = false, features = ["crossterm"] }
+rustact = { git = "https://github.com/IllusiveBagel/rustact.git", branch = "main" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

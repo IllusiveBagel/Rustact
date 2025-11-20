@@ -297,7 +297,7 @@ The demo’s counter listens for `KeyCode::Char('+')`, `'-'`, and `r`, updating 
 
 `App::run` (in `src/runtime/mod.rs`):
 
-1. Spawns three async tasks:
+1. Spawns three async tasks (via the pluggable `RuntimeDriver`—swap in mocks with `App::with_driver` when testing):
     - `spawn_terminal_events` – wraps `crossterm::event::EventStream`, converts to `FrameworkEvent`, and issues `AppMessage::ExternalEvent`. Detects Ctrl+C, routes mouse clicks into the button/input hitbox registries, and requests shutdown.
    - `spawn_tick_loop` – emits `FrameworkEvent::Tick` at `AppConfig::tick_rate` (default 250ms).
    - `spawn_shutdown_watcher` – listens for OS-level `tokio::signal::ctrl_c` as a fallback.

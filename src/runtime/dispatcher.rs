@@ -22,7 +22,7 @@ impl Dispatcher {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) enum AppMessage {
+pub enum AppMessage {
     RequestRender,
     ExternalEvent(FrameworkEvent),
     Shutdown,
