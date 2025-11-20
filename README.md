@@ -14,6 +14,14 @@ Rustact is an experimental, React-inspired framework for building async terminal
 - **CSS-inspired styling** – Drop tweaks into `styles/demo.css` to recolor widgets, toggle button fills, rename gauge labels, change list highlight colors, resize form/table columns, or theme inputs without touching Rust code.
 - **Demo app** – `src/main.rs` now composes every hook (state, reducer, ref, memo, callback, effect, context) with all widgets (text, flex, gauge, buttons, lists, tables, trees, forms) so you can see each feature in one place.
 
+## Documentation
+
+- `docs/guide.md` – day-to-day developer guide (setup, workflows, hook primer).
+- `docs/tutorial.md` – step-by-step tutorial for building a fresh Rustact app.
+- `docs/architecture.md` – deep dive into the runtime, hooks, renderer, and events.
+- `docs/styling.md` – CSS subset reference and theming tips.
+- `docs/roadmap.md` – prioritized initiatives to steer ongoing work.
+
 ## Running the demo
 
 ```bash
