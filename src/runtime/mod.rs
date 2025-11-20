@@ -5,6 +5,9 @@ mod element;
 mod tasks;
 mod view;
 
+#[cfg(test)]
+mod tests;
+
 pub use ratatui::style::Color;
 
 pub use app::{App, AppConfig};

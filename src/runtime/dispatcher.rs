@@ -21,7 +21,7 @@ impl Dispatcher {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum AppMessage {
     RequestRender,
     ExternalEvent(FrameworkEvent),

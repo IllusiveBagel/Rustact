@@ -71,3 +71,6 @@ pub fn is_button_click(event: &FrameworkEvent, button_id: &str) -> bool {
     }
     false
 }
+
+#[cfg(test)]
+mod tests;

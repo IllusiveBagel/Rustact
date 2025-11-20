@@ -353,7 +353,7 @@ impl App {
     }
 }
 
-fn flatten_tree_items(items: Vec<TreeItemNode>) -> Vec<TreeRowView> {
+pub(crate) fn flatten_tree_items(items: Vec<TreeItemNode>) -> Vec<TreeRowView> {
     let mut rows = Vec::new();
     push_tree_items(items, 0, &mut rows);
     rows
