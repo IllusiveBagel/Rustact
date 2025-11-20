@@ -1,5 +1,10 @@
+use std::sync::Arc;
+
 use crate::events::{EventBus, FrameworkEvent};
+use crate::styles::Stylesheet;
 use tokio::sync::mpsc;
+use tokio::sync::mpsc::error::TrySendError;
+use tracing::trace;
 
 #[derive(Clone)]
 pub struct Dispatcher {
@@ -13,7 +18,13 @@ impl Dispatcher {
     }
 
     pub fn request_render(&self) {
-        let _ = self.tx.try_send(AppMessage::RequestRender);
+        match self.tx.try_send(AppMessage::RequestRender) {
+            Ok(_) => trace!("render request queued"),
+            Err(TrySendError::Full(_)) => {
+                trace!("render request dropped because channel is full")
+            }
+            Err(TrySendError::Closed(_)) => trace!("render request dropped because channel closed"),
+        }
     }
 
     pub fn events(&self) -> EventBus {
@@ -26,4 +37,5 @@ pub enum AppMessage {
     RequestRender,
     ExternalEvent(FrameworkEvent),
     Shutdown,
+    StylesheetUpdated(Arc<Stylesheet>),
 }

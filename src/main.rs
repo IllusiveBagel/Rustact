@@ -1,9 +1,10 @@
+use std::path::Path;
 use std::time::Duration;
 
-use anyhow::Context;
 use crossterm::event::KeyCode;
 use crossterm::event::MouseButton;
 use tokio::sync::broadcast::error::RecvError;
+use tracing::warn;
 
 use rustact::runtime::{AppConfig, Color, TextInputNode};
 use rustact::styles::{ComputedStyle, StyleQuery, Stylesheet};
@@ -16,6 +17,7 @@ use rustact::{is_button_click, is_mouse_click, mouse_position, mouse_scroll_delt
 
 const APP_NAME: &str = "Rustact Demo";
 const DEMO_STYLES: &str = include_str!("../styles/demo.css");
+const DEMO_STYLES_PATH: &str = "styles/demo.css";
 const COUNTER_MINUS_BUTTON: &str = "counter:minus";
 const COUNTER_PLUS_BUTTON: &str = "counter:plus";
 const COUNTER_GAUGE_ID: &str = "counter-progress";
@@ -29,13 +31,47 @@ const FEEDBACK_TOKEN_INPUT: &str = "feedback-token";
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let stylesheet = Stylesheet::parse(DEMO_STYLES).context("parse demo stylesheet")?;
-    let app = App::new(APP_NAME, component("AppRoot", app_root))
+    let stylesheet = load_demo_stylesheet();
+    let mut app = App::new(APP_NAME, component("AppRoot", app_root))
         .with_config(AppConfig {
             tick_rate: Duration::from_millis(200),
         })
         .with_stylesheet(stylesheet);
+    if should_watch_styles() {
+        if Path::new(DEMO_STYLES_PATH).exists() {
+            app = app.watch_stylesheet(DEMO_STYLES_PATH);
+        } else {
+            warn!(
+                path = DEMO_STYLES_PATH,
+                "RUSTACT_WATCH_STYLES was set but stylesheet file was not found",
+            );
+        }
+    }
     app.run().await
+}
+
+fn load_demo_stylesheet() -> Stylesheet {
+    match Stylesheet::from_file(DEMO_STYLES_PATH) {
+        Ok(sheet) => sheet,
+        Err(err) => {
+            warn!(
+                path = DEMO_STYLES_PATH,
+                error = ?err,
+                "Unable to read stylesheet from disk, falling back to embedded CSS",
+            );
+            Stylesheet::parse(DEMO_STYLES).expect("embedded demo stylesheet should parse")
+        }
+    }
+}
+
+fn should_watch_styles() -> bool {
+    match std::env::var("RUSTACT_WATCH_STYLES") {
+        Ok(value) => {
+            let normalized = value.to_ascii_lowercase();
+            matches!(normalized.as_str(), "1" | "true" | "on")
+        }
+        Err(_) => false,
+    }
 }
 
 fn app_root(ctx: &mut Scope) -> Element {

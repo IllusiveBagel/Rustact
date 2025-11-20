@@ -5,6 +5,7 @@ use crossterm::event::{
     MouseEventKind,
 };
 use tokio::sync::broadcast;
+use tracing::trace;
 
 #[derive(Clone, Debug)]
 pub enum FrameworkEvent {
@@ -26,6 +27,7 @@ impl EventBus {
     }
 
     pub fn publish(&self, event: FrameworkEvent) {
+        trace!(event = ?event, "publishing framework event");
         let _ = self.tx.send(event);
     }
 

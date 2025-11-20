@@ -47,6 +47,7 @@ While the demo is running:
 
 ```bash
 cargo run                  # launch the demo
+RUSTACT_WATCH_STYLES=1 cargo run  # optional: live reload styles/demo.css
 cargo fmt && cargo clippy  # format + lint changes
 cargo test                 # run the growing unit-test suite
 ```
@@ -86,7 +87,8 @@ Scope exposes additional helpers (`dispatcher`, `styles`, `use_text_input_valida
 ## 7. Styling & theming
 
 - Stylesheets use a compact CSS subset (type/id/class selectors plus `:root`).
-- Load them via `App::with_stylesheet(Stylesheet::parse(include_str!(...))?)`.
+- Load them from disk with `Stylesheet::from_file("styles/demo.css")` (falls back to embedded CSS when missing) and pass them to `App::with_stylesheet(...)`.
+- Toggle hot reload by setting `RUSTACT_WATCH_STYLES=1` (or `true`/`on`); the runtime will poll `styles/demo.css`, re-parse on change, and schedule a redraw without restarting the process.
 - Query inside components with `ctx.styles().query(StyleQuery::element("button").with_id("counter-plus"))`.
 - See `docs/styling.md` for supported selectors, properties, and examples.
 
@@ -156,3 +158,19 @@ let app = App::new("Testable", component("Unit", |_ctx| Element::Empty))
 ```
 
 This makes `App::run()` deterministic under `cargo test`, unlocks headless integration drivers, and keeps the production behavior intact via the default driver (`DefaultRuntimeDriver`).
+
+## 11. Tracing & diagnostics
+
+Rustact emits `tracing` spans around render requests, external events, effect scheduling, and shutdown flow. To see the logs, add a subscriber in your binary (or the demo app) before calling `App::run`:
+
+```rust
+use tracing_subscriber::EnvFilter;
+
+fn init_tracing() {
+	let _ = tracing_subscriber::fmt()
+		.with_env_filter(EnvFilter::new("rustact=info"))
+		.try_init();
+}
+```
+
+Run with `RUST_LOG=rustact=trace` (or any filter) to inspect the lifecycle. This is especially handy when debugging shutdown behavior, effect churn, or event floods.

@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
 
 use anyhow::{Result, anyhow};
 
@@ -49,6 +51,11 @@ impl Stylesheet {
             }
         }
         Ok(sheet)
+    }
+
+    pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
+        let contents = fs::read_to_string(path)?;
+        Self::parse(&contents)
     }
 
     pub fn root(&self) -> ComputedStyle {

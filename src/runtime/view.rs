@@ -1,6 +1,6 @@
 use ratatui::style::Color;
 
-use super::element::{FlexDirection, FormFieldStatus};
+use super::element::{FlexDirection, FormFieldStatus, ToastLevel};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum View {
@@ -15,6 +15,10 @@ pub enum View {
     Tree(TreeView),
     Form(FormView),
     Input(TextInputView),
+    Tabs(TabsView),
+    Layered(LayersView),
+    Modal(ModalView),
+    ToastStack(ToastStackView),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -132,4 +136,43 @@ pub struct TextInputView {
     pub focus_background: Option<Color>,
     pub status: FormFieldStatus,
     pub cursor_visible: bool,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct TabsView {
+    pub tabs: Vec<TabView>,
+    pub active: usize,
+    pub accent: Option<Color>,
+    pub title: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct TabView {
+    pub label: String,
+    pub content: View,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct LayersView {
+    pub layers: Vec<View>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModalView {
+    pub title: Option<String>,
+    pub content: Box<View>,
+    pub width: Option<u16>,
+    pub height: Option<u16>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ToastStackView {
+    pub toasts: Vec<ToastView>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ToastView {
+    pub title: String,
+    pub body: Option<String>,
+    pub level: ToastLevel,
 }

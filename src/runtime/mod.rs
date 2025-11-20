@@ -15,13 +15,15 @@ pub use component::{ComponentElement, ComponentFn, component};
 pub use dispatcher::Dispatcher;
 pub use element::{
     ButtonNode, Element, FlexDirection, FormFieldNode, FormFieldStatus, FormNode, GaugeNode,
-    ListItemNode, ListNode, TableCellNode, TableNode, TableRowNode, TextInputNode, TreeItemNode,
+    LayeredNode, ListItemNode, ListNode, ModalNode, TabPaneNode, TableCellNode, TableNode,
+    TableRowNode, TabsNode, TextInputNode, ToastLevel, ToastNode, ToastStackNode, TreeItemNode,
     TreeNode,
 };
 pub use tasks::{DefaultRuntimeDriver, RuntimeDriver};
 pub use view::{
-    BlockView, ButtonView, FlexView, FormFieldView, FormView, GaugeView, ListItemView, ListView,
-    TableCellView, TableRowView, TableView, TextInputView, TextView, TreeRowView, TreeView, View,
+    BlockView, ButtonView, FlexView, FormFieldView, FormView, GaugeView, LayersView, ListItemView,
+    ListView, ModalView, TabView, TableCellView, TableRowView, TableView, TabsView, TextInputView,
+    TextView, ToastStackView, ToastView, TreeRowView, TreeView, View,
 };
 
 pub(crate) use component::ComponentId;

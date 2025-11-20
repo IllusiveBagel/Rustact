@@ -17,6 +17,10 @@ pub enum Element {
     Tree(TreeNode),
     Form(FormNode),
     Input(TextInputNode),
+    Tabs(TabsNode),
+    Layered(LayeredNode),
+    Modal(ModalNode),
+    ToastStack(ToastStackNode),
     Fragment(Vec<Element>),
     Component(ComponentElement),
 }
@@ -111,6 +115,22 @@ impl Element {
 
     pub fn text_input(node: TextInputNode) -> Self {
         Element::Input(node)
+    }
+
+    pub fn tabs(node: TabsNode) -> Self {
+        Element::Tabs(node)
+    }
+
+    pub fn layers(node: LayeredNode) -> Self {
+        Element::Layered(node)
+    }
+
+    pub fn modal(node: ModalNode) -> Self {
+        Element::Modal(node)
+    }
+
+    pub fn toast_stack(node: ToastStackNode) -> Self {
+        Element::ToastStack(node)
     }
 }
 
@@ -512,4 +532,149 @@ impl TextInputNode {
         self.status = status;
         self
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct TabsNode {
+    pub tabs: Vec<TabPaneNode>,
+    pub active: usize,
+    pub accent: Option<Color>,
+    pub title: Option<String>,
+}
+
+impl TabsNode {
+    pub fn new(tabs: Vec<TabPaneNode>) -> Self {
+        Self {
+            tabs,
+            active: 0,
+            accent: None,
+            title: None,
+        }
+    }
+
+    pub fn active(mut self, index: usize) -> Self {
+        self.active = index;
+        self
+    }
+
+    pub fn accent(mut self, color: Color) -> Self {
+        self.accent = Some(color);
+        self
+    }
+
+    pub fn title(mut self, title: impl Into<String>) -> Self {
+        self.title = Some(title.into());
+        self
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct TabPaneNode {
+    pub label: String,
+    pub content: Element,
+}
+
+impl TabPaneNode {
+    pub fn new(label: impl Into<String>, content: Element) -> Self {
+        Self {
+            label: label.into(),
+            content,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct LayeredNode {
+    pub layers: Vec<Element>,
+}
+
+impl LayeredNode {
+    pub fn new(layers: Vec<Element>) -> Self {
+        Self { layers }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ModalNode {
+    pub title: Option<String>,
+    pub content: Box<Element>,
+    pub width: Option<u16>,
+    pub height: Option<u16>,
+}
+
+impl ModalNode {
+    pub fn new(content: Element) -> Self {
+        Self {
+            title: None,
+            content: Box::new(content),
+            width: None,
+            height: None,
+        }
+    }
+
+    pub fn title(mut self, title: impl Into<String>) -> Self {
+        self.title = Some(title.into());
+        self
+    }
+
+    pub fn width(mut self, width: u16) -> Self {
+        self.width = Some(width);
+        self
+    }
+
+    pub fn height(mut self, height: u16) -> Self {
+        self.height = Some(height);
+        self
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ToastStackNode {
+    pub toasts: Vec<ToastNode>,
+}
+
+impl ToastStackNode {
+    pub fn new(toasts: Vec<ToastNode>) -> Self {
+        Self { toasts }
+    }
+
+    pub fn push(mut self, toast: ToastNode) -> Self {
+        self.toasts.push(toast);
+        self
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ToastNode {
+    pub title: String,
+    pub body: Option<String>,
+    pub level: ToastLevel,
+}
+
+impl ToastNode {
+    pub fn new(title: impl Into<String>) -> Self {
+        Self {
+            title: title.into(),
+            body: None,
+            level: ToastLevel::Info,
+        }
+    }
+
+    pub fn body(mut self, body: impl Into<String>) -> Self {
+        self.body = Some(body.into());
+        self
+    }
+
+    pub fn level(mut self, level: ToastLevel) -> Self {
+        self.level = level;
+        self
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ToastLevel {
+    Info,
+    Success,
+    Warning,
+    Error,
 }

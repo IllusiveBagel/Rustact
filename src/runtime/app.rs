@@ -1,9 +1,17 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, hash_map::DefaultHasher};
+use std::env;
+use std::hash::{Hash, Hasher};
+use std::io::ErrorKind;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Context;
+use tokio::fs;
 use tokio::sync::mpsc;
+use tokio::task::JoinHandle;
+use tokio::time::sleep;
+use tracing::{info, trace, warn};
 
 use crate::context::ContextStack;
 use crate::events::{DEFAULT_TICK_RATE, EventBus};
@@ -17,8 +25,9 @@ use super::dispatcher::{AppMessage, Dispatcher};
 use super::element::{Element, FlexDirection, TreeItemNode};
 use super::tasks::{DefaultRuntimeDriver, RuntimeDriver};
 use super::view::{
-    BlockView, ButtonView, FlexView, FormFieldView, FormView, GaugeView, ListItemView, ListView,
-    TableCellView, TableRowView, TableView, TextInputView, TextView, TreeRowView, TreeView, View,
+    BlockView, ButtonView, FlexView, FormFieldView, FormView, GaugeView, LayersView, ListItemView,
+    ListView, ModalView, TabView, TableCellView, TableRowView, TableView, TabsView, TextInputView,
+    TextView, ToastStackView, ToastView, TreeRowView, TreeView, View,
 };
 
 #[derive(Clone)]
@@ -30,6 +39,7 @@ pub struct App {
     config: AppConfig,
     styles: Arc<Stylesheet>,
     driver: Arc<dyn RuntimeDriver>,
+    stylesheet_watch: Option<PathBuf>,
 }
 
 #[derive(Clone, Copy)]
@@ -55,6 +65,7 @@ impl App {
             config: AppConfig::default(),
             styles: Arc::new(Stylesheet::default()),
             driver: Arc::new(DefaultRuntimeDriver::default()),
+            stylesheet_watch: None,
         }
     }
 
@@ -68,6 +79,23 @@ impl App {
         self
     }
 
+    pub fn watch_stylesheet<P>(mut self, path: P) -> Self
+    where
+        P: Into<PathBuf>,
+    {
+        let candidate = path.into();
+        let resolved = if candidate.is_absolute() {
+            candidate
+        } else {
+            match env::current_dir() {
+                Ok(cwd) => cwd.join(&candidate),
+                Err(_) => candidate,
+            }
+        };
+        self.stylesheet_watch = Some(resolved);
+        self
+    }
+
     pub fn with_driver<D>(mut self, driver: D) -> Self
     where
         D: RuntimeDriver + 'static,
@@ -76,7 +104,8 @@ impl App {
         self
     }
 
-    pub async fn run(self) -> anyhow::Result<()> {
+    pub async fn run(mut self) -> anyhow::Result<()> {
+        info!(app = self.name, "starting runtime");
         let (tx, mut rx) = mpsc::channel(128);
         let dispatcher = Dispatcher::new(tx.clone(), self.event_bus.clone());
         let mut renderer = Renderer::new(self.name).context("initialize renderer")?;
@@ -87,11 +116,18 @@ impl App {
             .driver
             .spawn_tick_loop(tx.clone(), self.config.tick_rate);
         let shutdown_task = self.driver.spawn_shutdown_watcher(tx.clone());
+        let stylesheet_task = self
+            .stylesheet_watch
+            .clone()
+            .map(|path| spawn_stylesheet_watcher(path, tx.clone()));
 
-        tx.send(AppMessage::RequestRender).await.ok();
+        if tx.send(AppMessage::RequestRender).await.is_err() {
+            warn!(app = self.name, "failed to enqueue initial render request");
+        }
         let mut live_components = HashSet::new();
 
         while let Some(message) = rx.recv().await {
+            trace!(app = self.name, message = ?message, "processing app message");
             match message {
                 AppMessage::RequestRender => {
                     live_components.clear();
@@ -112,24 +148,47 @@ impl App {
                     let should_render =
                         last_view.as_ref().map(|prev| prev != &view).unwrap_or(true);
                     if should_render {
-                        renderer.draw(&view)?;
+                        renderer.draw(&view).map_err(|err| {
+                            warn!(app = self.name, error = ?err, "renderer draw failed");
+                            err
+                        })?;
+                        trace!(app = self.name, "frame drawn");
                     }
                     last_view = Some(view);
+                    trace!(
+                        app = self.name,
+                        effect_count = effects.len(),
+                        "render completed"
+                    );
                     self.run_effects(effects, &dispatcher);
                     self.hooks.prune(&live_components);
                 }
                 AppMessage::ExternalEvent(event) => {
+                    trace!(app = self.name, event = ?event, "dispatching external event");
                     TextInputs::handle_event(&event, &dispatcher);
                     self.event_bus.publish(event);
                 }
-                AppMessage::Shutdown => break,
+                AppMessage::Shutdown => {
+                    info!(app = self.name, "shutdown requested");
+                    break;
+                }
+                AppMessage::StylesheetUpdated(stylesheet) => {
+                    self.styles = stylesheet;
+                    info!(app = self.name, "stylesheet reloaded");
+                    dispatcher.request_render();
+                }
             }
         }
 
         drop(renderer);
-        event_task.abort();
-        tick_task.abort();
-        shutdown_task.abort();
+        trace!(app = self.name, "tearing down runtime tasks");
+        abort_and_log("terminal_events", event_task).await;
+        abort_and_log("tick_loop", tick_task).await;
+        abort_and_log("shutdown_watcher", shutdown_task).await;
+        if let Some(task) = stylesheet_task {
+            task.abort();
+        }
+        info!(app = self.name, "runtime stopped");
         Ok(())
     }
 
@@ -141,12 +200,18 @@ impl App {
                 deps,
                 task,
             } = effect;
+            trace!(
+                component = %component_id,
+                slot_index,
+                "running effect cleanup"
+            );
             self.hooks
                 .with_effect_slot(&component_id, slot_index, |slot| {
                     if let Some(cleanup) = slot.take_cleanup() {
                         cleanup();
                     }
                 });
+            trace!(component = %component_id, slot_index, "invoking effect task");
             let cleanup = task(dispatcher.clone());
             self.hooks
                 .with_effect_slot(&component_id, slot_index, |slot| {
@@ -312,6 +377,80 @@ impl App {
                     cursor_visible,
                 })))
             }
+            Element::Tabs(node) => {
+                let mut tabs = Vec::new();
+                for (index, tab) in node.tabs.into_iter().enumerate() {
+                    path.push(index);
+                    let view =
+                        self.render_element(tab.content, dispatcher, path, context, live, effects)?;
+                    path.pop();
+                    if let Some(view) = view {
+                        tabs.push(TabView {
+                            label: tab.label,
+                            content: view,
+                        });
+                    }
+                }
+                if tabs.is_empty() {
+                    Ok(Some(View::Empty))
+                } else {
+                    let clamped = node.active.min(tabs.len().saturating_sub(1));
+                    Ok(Some(View::Tabs(TabsView {
+                        tabs,
+                        active: clamped,
+                        accent: node.accent,
+                        title: node.title,
+                    })))
+                }
+            }
+            Element::Layered(node) => {
+                let mut layers = Vec::new();
+                for (index, layer) in node.layers.into_iter().enumerate() {
+                    path.push(index);
+                    if let Some(view) =
+                        self.render_element(layer, dispatcher, path, context, live, effects)?
+                    {
+                        layers.push(view);
+                    }
+                    path.pop();
+                }
+                if layers.is_empty() {
+                    Ok(Some(View::Empty))
+                } else {
+                    Ok(Some(View::Layered(LayersView { layers })))
+                }
+            }
+            Element::Modal(node) => {
+                path.push(0);
+                let content =
+                    self.render_element(*node.content, dispatcher, path, context, live, effects)?;
+                path.pop();
+                if let Some(content) = content {
+                    Ok(Some(View::Modal(ModalView {
+                        title: node.title,
+                        content: Box::new(content),
+                        width: node.width,
+                        height: node.height,
+                    })))
+                } else {
+                    Ok(Some(View::Empty))
+                }
+            }
+            Element::ToastStack(node) => {
+                if node.toasts.is_empty() {
+                    return Ok(Some(View::Empty));
+                }
+                let toasts = node
+                    .toasts
+                    .into_iter()
+                    .map(|toast| ToastView {
+                        title: toast.title,
+                        body: toast.body,
+                        level: toast.level,
+                    })
+                    .collect();
+                Ok(Some(View::ToastStack(ToastStackView { toasts })))
+            }
             Element::Fragment(children) => {
                 let mut views = Vec::new();
                 for (index, child) in children.into_iter().enumerate() {
@@ -371,6 +510,73 @@ pub(crate) fn flatten_tree_items(items: Vec<TreeItemNode>) -> Vec<TreeRowView> {
     rows
 }
 
+fn spawn_stylesheet_watcher(path: PathBuf, tx: mpsc::Sender<AppMessage>) -> JoinHandle<()> {
+    tokio::spawn(async move {
+        info!(path = %path.display(), "stylesheet watcher started");
+        let mut snapshot = fingerprint_if_exists(&path).await;
+        loop {
+            match maybe_reload_stylesheet(&path, &mut snapshot).await {
+                Ok(Some(stylesheet)) => {
+                    info!(path = %path.display(), "stylesheet change detected");
+                    if tx
+                        .send(AppMessage::StylesheetUpdated(stylesheet))
+                        .await
+                        .is_err()
+                    {
+                        break;
+                    }
+                }
+                Ok(None) => {}
+                Err(err) => warn!(path = %path.display(), error = ?err, "stylesheet reload failed"),
+            }
+            sleep(Duration::from_millis(400)).await;
+        }
+    })
+}
+
+async fn fingerprint_if_exists(path: &Path) -> Option<StylesheetSnapshot> {
+    match fs::read_to_string(path).await {
+        Ok(contents) => Some(StylesheetSnapshot {
+            fingerprint: fingerprint(&contents),
+        }),
+        Err(_) => None,
+    }
+}
+
+async fn maybe_reload_stylesheet(
+    path: &Path,
+    snapshot: &mut Option<StylesheetSnapshot>,
+) -> anyhow::Result<Option<Arc<Stylesheet>>> {
+    let contents = match fs::read_to_string(path).await {
+        Ok(contents) => contents,
+        Err(err) if err.kind() == ErrorKind::NotFound => return Ok(None),
+        Err(err) => return Err(err.into()),
+    };
+    let fingerprint = fingerprint(&contents);
+    if snapshot
+        .as_ref()
+        .map(|snap| snap.fingerprint == fingerprint)
+        .unwrap_or(false)
+    {
+        return Ok(None);
+    }
+    let stylesheet = Stylesheet::parse(&contents)
+        .with_context(|| format!("parse stylesheet {}", path.display()))?;
+    *snapshot = Some(StylesheetSnapshot { fingerprint });
+    Ok(Some(Arc::new(stylesheet)))
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+struct StylesheetSnapshot {
+    fingerprint: u64,
+}
+
+fn fingerprint(input: &str) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    input.hash(&mut hasher);
+    hasher.finish()
+}
+
 fn push_tree_items(nodes: Vec<TreeItemNode>, depth: usize, rows: &mut Vec<TreeRowView>) {
     for node in nodes {
         let has_children = !node.children.is_empty();
@@ -384,5 +590,14 @@ fn push_tree_items(nodes: Vec<TreeItemNode>, depth: usize, rows: &mut Vec<TreeRo
         if expanded {
             push_tree_items(node.children, depth + 1, rows);
         }
+    }
+}
+
+async fn abort_and_log(label: &str, handle: JoinHandle<()>) {
+    handle.abort();
+    match handle.await {
+        Ok(_) => trace!(task = label, "task aborted cleanly"),
+        Err(err) if err.is_cancelled() => trace!(task = label, "task cancellation confirmed"),
+        Err(err) => warn!(task = label, error = ?err, "task join failed"),
     }
 }

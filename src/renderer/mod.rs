@@ -18,8 +18,9 @@ use crate::text_input::TextInputs;
 mod widgets;
 
 use widgets::{
-    render_block, render_button, render_flex, render_form, render_gauge, render_list, render_table,
-    render_text, render_text_input, render_tree,
+    render_block, render_button, render_flex, render_form, render_gauge, render_layers,
+    render_list, render_modal, render_table, render_tabs, render_text, render_text_input,
+    render_toast_stack, render_tree,
 };
 
 pub struct Renderer {
@@ -81,5 +82,9 @@ fn render_view(frame: &mut Frame<'_>, area: Rect, view: &View) {
         View::Tree(tree) => render_tree(frame, area, tree),
         View::Form(form) => render_form(frame, area, form),
         View::Input(input) => render_text_input(frame, area, input),
+        View::Tabs(tabs) => render_tabs(frame, area, tabs, render_view),
+        View::Layered(layers) => render_layers(frame, area, layers, render_view),
+        View::Modal(modal) => render_modal(frame, area, modal, render_view),
+        View::ToastStack(stack) => render_toast_stack(frame, area, stack),
     }
 }

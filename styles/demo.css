@@ -1,7 +1,7 @@
 /* stylelint-disable */
 
 :root {
-  --accent-color: #00e8ff;
+  --accent-color: #00e8aa;
   --warning-color: #ffb347;
   --success-color: #7bd88f;
   --danger-color: #ff6b6b;
@@ -9,7 +9,7 @@
 }
 
 hero {
-  color: #00e8ff;
+  color: #ff0000;
   --subtitle-color: #8b98a8;
 }
 
