@@ -84,3 +84,6 @@ pub fn mouse_position(event: &FrameworkEvent) -> Option<(u16, u16)> {
 }
 
 pub const DEFAULT_TICK_RATE: Duration = Duration::from_millis(250);
+
+#[cfg(test)]
+mod tests;

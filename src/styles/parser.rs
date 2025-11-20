@@ -35,7 +35,6 @@ pub(crate) fn parse_declarations(body: &str) -> HashMap<String, String> {
     }
     map
 }
-
 pub(crate) fn clean_value(value: &str) -> String {
     let trimmed = value.trim();
     if trimmed.starts_with('"') && trimmed.ends_with('"') && trimmed.len() >= 2 {

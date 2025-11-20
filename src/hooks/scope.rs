@@ -9,13 +9,7 @@ use crate::text_input::{TextInputHandle, TextInputSnapshot};
 
 use super::handles::{ReducerDispatch, ReducerFn, RefHandle, StateHandle};
 use super::registry::{
-    AnySlot,
-    Cleanup,
-    EffectHook,
-    EffectInvocation,
-    HookSlot,
-    HookStore,
-    TextInputEntry,
+    AnySlot, Cleanup, EffectHook, EffectInvocation, HookSlot, HookStore, TextInputEntry,
 };
 
 pub struct Scope<'a> {
