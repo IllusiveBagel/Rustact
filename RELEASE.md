@@ -36,10 +36,14 @@ This project publishes tagged releases to GitHub (and eventually crates.io). Use
    git tag v0.x.y
    git push origin v0.x.y
    ```
-   The `release.yml` workflow will build artifacts and attach them to the GitHub Release automatically.
+   The `release.yml` workflow will build artifacts, attach them to the GitHub Release, and
+   (if the `CARGO_REGISTRY_TOKEN` secret is configured) run `cargo publish` automatically.
+   Without the secret, the workflow skips publish and logs a reminder so you can run
+   `cargo publish` locally.
 8. **Post-release tasks**
    - Close the milestone.
    - Announce in README/docs if necessary.
    - Create a new `Unreleased` section in `CHANGELOG.md` if it was removed.
 
-Future crates.io publishing steps can be appended once the crate is public.
+When enabling crates.io publishing in CI, add a repository or environment secret named
+`CARGO_REGISTRY_TOKEN` with a crates.io API token generated via `cargo login --registry crates-io`.
