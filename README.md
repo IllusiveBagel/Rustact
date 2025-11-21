@@ -239,4 +239,8 @@ Every render builds a `View` tree, compares it with the previous frame, and only
 ## Next steps
 
 - Package reusable components and publish to crates.io.
+
+## License
+
+Rustact is distributed under the [MIT License](LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.
 ```}
