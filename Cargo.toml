@@ -2,6 +2,14 @@
 name = "rustact"
 version = "0.1.0"
 edition = "2024"
+description = "Async terminal UI framework inspired by React, built on top of ratatui and tokio."
+license = "MIT"
+repository = "https://github.com/IllusiveBagel/rustact"
+homepage = "https://github.com/IllusiveBagel/rustact"
+readme = "README.md"
+rust-version = "1.76"
+keywords = ["tui", "terminal", "react", "tokio", "async"]
+categories = ["command-line-utilities", "gui"]
 
 [dependencies]
 anyhow = "1.0"

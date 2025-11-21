@@ -25,10 +25,16 @@ jobs:
           override: true
       - name: Build docs
         run: cargo doc --no-deps
+      - name: Assemble site artifact
+        run: |
+          mkdir -p site-dist
+          cp -R website/* site-dist/
+          mkdir -p site-dist/api
+          cp -R target/doc/* site-dist/api/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: target/doc
+          path: site-dist
 
   deploy:
     needs: build

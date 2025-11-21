@@ -12,14 +12,15 @@ Artifacts land in `target/doc/`. Add `--open` while iterating.
 
 ## 2. Automated GitHub Pages workflow
 
-Rustact ships `.github/workflows/publish-docs.yml`, which:
+Rustact ships `.github/workflows/publish-docs.yml`, which now builds <em>two</em> assets before deploying:
 
 1. Runs on every push to `main` (plus manual dispatch).
-2. Builds docs with `cargo doc --no-deps` on Ubuntu.
-3. Uploads `target/doc` as a Pages artifact.
-4. Deploys via `actions/deploy-pages`, exposing them at `https://<owner>.github.io/rustact/`.
+2. Builds API docs with `cargo doc --no-deps` on Ubuntu.
+3. Copies the hand-crafted marketing site from `website/` into `site-dist/` and nests the generated API docs inside `site-dist/api/`.
+4. Uploads `site-dist` as the Pages artifact, so `/` serves the landing page and `/api/rustact/` exposes the API docs.
+5. Deploys via `actions/deploy-pages`, exposing everything at `https://<owner>.github.io/rustact/`.
 
-First-time setup: in GitHub → Settings → Pages, set the source to "GitHub Actions". Subsequent pushes redeploy automatically.
+First-time setup: in GitHub → Settings → Pages, set the source to "GitHub Actions". Subsequent pushes redeploy automatically. When updating the website copy or styles, edit the files under `website/` so the workflow can pick them up.
 
 ## 3. Manual fallback (optional)
 
