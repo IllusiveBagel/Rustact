@@ -1,4 +1,4 @@
-base_url = "/"
+base_url = "https://illusivebagel.github.io/rustact/"
 compile_sass = false
 build_search_index = true
 minify_html = true

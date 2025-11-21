@@ -3,7 +3,7 @@
 {% block content %}
   <header>
     <nav>
-      <a class="brand" href="#top">Rustact</a>
+      <a class="brand" href="{{ get_url(path="/") }}">Rustact</a>
       <div class="links">
         <a href="#features">Features</a>
         <a href="#docs">Docs</a>
@@ -11,7 +11,7 @@
         <a href="#roadmap">Roadmap</a>
         <a href="#community">Community</a>
         <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="/api/rustact/index.html">API Docs</a>
+        <a href="{{ config.extra.docs_url }}">API Docs</a>
       </div>
     </nav>
     <section class="hero" id="top">
@@ -24,7 +24,7 @@
         </p>
         <div class="hero-cta">
           <a class="button-primary" href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">Star on GitHub</a>
-          <a class="button-ghost" href="/api/rustact/index.html">Browse API docs →</a>
+          <a class="button-ghost" href="{{ config.extra.docs_url }}">Browse API docs →</a>
         </div>
         <div class="stat-grid">
           <div class="stat">
@@ -131,7 +131,7 @@ cargo generate \
         <h3>API docs</h3>
         <p>Browse rustdoc output without cloning the repo. Every exported type is documented online.</p>
         <div class="link-row">
-          <a href="/api/rustact/index.html">Explore rustdoc →</a>
+          <a href="{{ config.extra.docs_url }}">Explore rustdoc →</a>
         </div>
       </article>
     </div>
@@ -169,7 +169,7 @@ cargo generate \
         <h3>Inspect the API surface</h3>
         <p>Every exported type lives inside the bundled API docs; jump straight into <code>rustact::runtime</code>, hooks, renderer, and components.</p>
         <div class="hero-cta" style="margin-top: 16px">
-          <a class="button-primary" href="/api/rustact/index.html">Explore API docs</a>
+          <a class="button-primary" href="{{ config.extra.docs_url }}">Explore API docs</a>
         </div>
       </article>
       <article class="card">
@@ -253,7 +253,7 @@ cargo generate \
 
   <footer>
     <p>
-      Built with ❤️ in Rust. View the source on <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">GitHub</a>, install from <a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">crates.io</a>, and browse API docs under <a href="/api/rustact/index.html">/api</a>.
+      Built with ❤️ in Rust. View the source on <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">GitHub</a>, install from <a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">crates.io</a>, and browse API docs under <a href="{{ config.extra.docs_url }}">/api</a>.
     </p>
   </footer>
 {% endblock content %}
