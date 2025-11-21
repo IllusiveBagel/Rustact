@@ -64,7 +64,7 @@ impl App {
             event_bus: EventBus::new(64),
             config: AppConfig::default(),
             styles: Arc::new(Stylesheet::default()),
-            driver: Arc::new(DefaultRuntimeDriver::default()),
+            driver: Arc::new(DefaultRuntimeDriver),
             stylesheet_watch: None,
         }
     }

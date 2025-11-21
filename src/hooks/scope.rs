@@ -123,7 +123,7 @@ impl<'a> Scope<'a> {
         F: FnOnce() -> T,
     {
         let index = self.next_index();
-        let result = {
+        {
             let mut store = self.store.lock();
             let slot = store.slot(index);
             match slot {
@@ -138,8 +138,7 @@ impl<'a> Scope<'a> {
                     .apply_or_update(deps, compute),
                 _ => panic!("use_memo hook order mismatch"),
             }
-        };
-        result
+        }
     }
 
     pub fn use_callback<T, D, F>(&mut self, deps: D, factory: F) -> Arc<T>
@@ -225,7 +224,7 @@ impl<'a> Scope<'a> {
         let index = self.next_index();
         let id = id.into();
         let dispatcher = self.dispatcher.clone();
-        let handle = {
+        {
             let mut store = self.store.lock();
             let slot = store.slot(index);
             match slot {
@@ -243,8 +242,7 @@ impl<'a> Scope<'a> {
                 }
                 _ => panic!("use_text_input hook order mismatch"),
             }
-        };
-        handle
+        }
     }
 
     pub fn use_text_input_validation<F>(

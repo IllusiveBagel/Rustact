@@ -36,7 +36,7 @@ pub fn render_form(frame: &mut Frame<'_>, area: Rect, view: &FormView) {
             .collect()
     };
 
-    let label_pct = view.label_width.min(90).max(10);
+    let label_pct = view.label_width.clamp(10, 90);
     let widths = vec![
         Constraint::Percentage(label_pct),
         Constraint::Percentage(100 - label_pct),

@@ -51,14 +51,13 @@ pub fn render_text_input(frame: &mut Frame<'_>, area: Rect, input: &TextInputVie
     let accent = input.accent.unwrap_or(Color::Cyan);
     let default_border = input.border_color.unwrap_or(Color::DarkGray);
     let focus_border = input.border_color.unwrap_or(accent);
+    let focus_override = if input.focused {
+        Some(focus_border)
+    } else {
+        None
+    };
     let border_color = status_color
-        .or_else(|| {
-            if input.focused {
-                Some(focus_border)
-            } else {
-                None
-            }
-        })
+        .or(focus_override)
         .unwrap_or(default_border);
     let mut border_style = Style::default().fg(border_color);
     if input.focused {

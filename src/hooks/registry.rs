@@ -96,7 +96,9 @@ impl HookStore {
     }
 }
 
+#[derive(Default)]
 pub(crate) enum HookSlot {
+    #[default]
     Vacant,
     State(Box<AnySlot>),
     Effect(EffectHook),
@@ -104,12 +106,6 @@ pub(crate) enum HookSlot {
     Reducer(Box<AnySlot>),
     RefCell(Box<AnySlot>),
     TextInput(Box<AnySlot>),
-}
-
-impl Default for HookSlot {
-    fn default() -> Self {
-        HookSlot::Vacant
-    }
 }
 
 #[derive(Default)]

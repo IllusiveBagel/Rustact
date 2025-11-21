@@ -11,7 +11,7 @@ pub fn render_toast_stack(frame: &mut Frame<'_>, area: Rect, view: &ToastStackVi
         return;
     }
 
-    let width = area.width.min(40).max(20);
+    let width = area.width.clamp(20, 40);
     let mut cursor_y = area.y + area.height;
 
     for toast in view.toasts.iter().rev() {

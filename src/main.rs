@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::sync::Arc;
 use std::time::Duration;
 
 use crossterm::event::KeyCode;
@@ -109,8 +110,7 @@ fn app_root(ctx: &mut Scope) -> Element {
 fn hero(ctx: &mut Scope) -> Element {
     let theme = ctx
         .use_context::<Theme>()
-        .map(|theme| theme.clone())
-        .unwrap_or_default();
+        .unwrap_or_else(|| Arc::new(Theme::default()));
     let hero_style = ctx.styles().query(StyleQuery::element("hero"));
     let title_color = hero_style.color("color").unwrap_or(theme.accent);
     let subtitle_color = hero_style
@@ -146,8 +146,7 @@ fn counter_panel(ctx: &mut Scope) -> Element {
     };
     let theme = ctx
         .use_context::<Theme>()
-        .map(|theme| theme.clone())
-        .unwrap_or_default();
+        .unwrap_or_else(|| Arc::new(Theme::default()));
     let panel_style = ctx
         .styles()
         .query(StyleQuery::element("panel").with_id(COUNTER_PANEL_ID));
@@ -281,8 +280,7 @@ fn stats_panel(ctx: &mut Scope) -> Element {
     let total_events = ctx.use_ref(|| 0usize);
     let theme = ctx
         .use_context::<Theme>()
-        .map(|theme| theme.clone())
-        .unwrap_or_default();
+        .unwrap_or_else(|| Arc::new(Theme::default()));
     let list_style = ctx
         .styles()
         .query(StyleQuery::element("list").with_id(STATS_LIST_ID));
@@ -326,7 +324,7 @@ fn stats_panel(ctx: &mut Scope) -> Element {
                                 if delta > 0 {
                                     *sel = sel.saturating_sub(delta as usize);
                                 } else {
-                                    let steps = delta.abs() as usize;
+                                    let steps = delta.unsigned_abs() as usize;
                                     *sel = sel.saturating_add(steps);
                                 }
                                 if *sel >= new_len {
@@ -411,8 +409,7 @@ fn meta_banner(ctx: &mut Scope) -> Element {
 fn service_table(ctx: &mut Scope) -> Element {
     let theme = ctx
         .use_context::<Theme>()
-        .map(|theme| theme.clone())
-        .unwrap_or_default();
+        .unwrap_or_else(|| Arc::new(Theme::default()));
     let table_style = ctx
         .styles()
         .query(StyleQuery::element("table").with_id(SERVICES_TABLE_ID));
@@ -490,8 +487,7 @@ fn config_form(ctx: &mut Scope) -> Element {
 fn feedback_panel(ctx: &mut Scope) -> Element {
     let theme = ctx
         .use_context::<Theme>()
-        .map(|theme| theme.clone())
-        .unwrap_or_default();
+        .unwrap_or_else(|| Arc::new(Theme::default()));
     let name_input = ctx.use_text_input(FEEDBACK_NAME_INPUT, || "Rusty User".to_string());
     let email_input = ctx.use_text_input(FEEDBACK_EMAIL_INPUT, String::new);
     let token_input = ctx.use_text_input(FEEDBACK_TOKEN_INPUT, String::new);
@@ -634,8 +630,7 @@ fn tips_panel(ctx: &mut Scope) -> Element {
 fn tip_card(ctx: &mut Scope, tip: Tip) -> Element {
     let theme = ctx
         .use_context::<Theme>()
-        .map(|theme| theme.clone())
-        .unwrap_or_default();
+        .unwrap_or_else(|| Arc::new(Theme::default()));
     let classes = [tip.class];
     let tip_style = ctx
         .styles()

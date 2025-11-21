@@ -46,8 +46,7 @@ pub(crate) fn clean_value(value: &str) -> String {
 
 pub(crate) fn parse_color(value: &str) -> Option<Color> {
     let trimmed = value.trim();
-    if trimmed.starts_with('#') {
-        let hex = &trimmed[1..];
+    if let Some(hex) = trimmed.strip_prefix('#') {
         return parse_hex_color(hex);
     }
     if let Some(inner) = trimmed
