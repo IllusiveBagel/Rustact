@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Verify fmt
+        run: cargo fmt --all -- --check
+      - name: Lint
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Test
+        run: cargo test --all --all-features
+      - name: Build docs
+        run: cargo doc --no-deps
+      - name: Package crate
+        run: cargo package --allow-dirty
+      - name: Upload crate artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/package/*.crate
