@@ -5,6 +5,14 @@
 
 Rustact is an experimental, React-inspired framework for building async terminal UIs in Rust. It layers a component/hook system on top of `ratatui`, offering familiar primitives such as components, state, effects, context, and an event bus.
 
+## Community & contributions
+
+- Read the [Contributing guide](CONTRIBUTING.md) for setup, workflows, and coding standards.
+- Review the [Code of Conduct](CODE_OF_CONDUCT.md); we follow the Contributor Covenant.
+- Maintainer contacts and responsibilities live in [MAINTAINERS.md](MAINTAINERS.md).
+- Release duties and checklists are captured in [RELEASE.md](RELEASE.md).
+- New issues/PRs should use the provided GitHub templates for consistent triage.
+
 ## Features
 
 - **Component tree & hooks** – Define components via `component("Name", |ctx| ...)` and manage state with `use_state`, `use_reducer`, `use_ref`, `use_effect`, `use_memo`, `use_callback`, and `provide_context` / `use_context`.
