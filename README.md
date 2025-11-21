@@ -32,9 +32,9 @@ cargo add rustact
 - **Mouse interactions** – Define button or input nodes with stable IDs; the renderer automatically maps mouse hitboxes so event handlers can react to clicks and focus changes.
 - **Text inputs & validation hooks** – `use_text_input` binds component state to editable fields (with cursor management, tab focus, and secure mode), while `use_text_input_validation` or `handle.set_status(...)` drive contextual border colors and helper text.
 - **Tabs, overlays, and toasts** – Compose `TabsNode`, `ModalNode`, `LayeredNode`, and `ToastStackNode` to build multi-pane dashboards with modal dialogs and notification stacks without wiring bespoke renderer code.
-- **CSS-inspired styling** – Drop tweaks into `styles/demo.css` to recolor widgets, toggle button fills, rename gauge labels, change list highlight colors, resize form/table columns, or theme inputs without touching Rust code.
-- **Optional style hot reload** – Set `RUSTACT_WATCH_STYLES=1` (or `true`/`on`) to have the runtime poll `styles/demo.css` and live-reload the stylesheet without restarting the app.
-- **Demo app** – `src/main.rs` now composes every hook (state, reducer, ref, memo, callback, effect, context) with all widgets (text, flex, gauge, buttons, lists, tables, trees, forms) so you can see each feature in one place.
+- **CSS-inspired styling** – Drop tweaks into `styles/demo.css` inside each example crate (e.g. `examples/rustact-demo/styles/demo.css`) to recolor widgets, toggle button fills, rename gauge labels, change list highlight colors, resize form/table columns, or theme inputs without touching Rust code.
+- **Optional style hot reload** – Set `RUSTACT_WATCH_STYLES=1` (or `true`/`on`) to have the runtime poll the sibling `styles/demo.css` file and live-reload the stylesheet without restarting the app.
+- **Demo app** – `examples/rustact-demo/src/main.rs` now composes every hook (state, reducer, ref, memo, callback, effect, context) with all widgets (text, flex, gauge, buttons, lists, tables, trees, forms) so you can see each feature in one place.
 
 ## Documentation
 
@@ -46,6 +46,7 @@ cargo add rustact
 - `docs/api-docs.md` – publishing instructions for hosting `cargo doc` output.
 - `docs/template.md` – outline for the upcoming `cargo generate` starter template.
 - `templates/rustact-app/` – ready-to-use project scaffold consumable via `cargo generate`.
+- `examples/README.md` – overview of the standalone demo crates plus run instructions.
 
 ## Starter template
 
@@ -87,6 +88,7 @@ Then set `RUST_LOG=info` (or more specific filters) before running the app to se
 ## Running the demo
 
 ```bash
+cd examples/rustact-demo
 cargo run
 ```
 
@@ -97,18 +99,21 @@ While running:
 - Check the framework overview banner and tips column to see keyed components, fragments, and shared context in action.
 - Exit with `Ctrl+C`.
 
+See `examples/README.md` for more about the demo layout and publishing guidance.
+
 ### Watching styles without restarting
 
 ```bash
 RUSTACT_WATCH_STYLES=1 cargo run
 ```
 
-When the env var is set (accepts `1`, `true`, or `on`) and `styles/demo.css` exists next to the binary, Rustact will poll the file, re-parse it on change, and trigger a render so you can see your CSS edits immediately. The demo and ops dashboard both honor the flag; when the file is missing, the runtime logs a warning and keeps using the embedded stylesheet.
+Run the command from inside the example you want to tweak. When the env var is set (accepts `1`, `true`, or `on`) and a `styles/demo.css` file exists next to the binary, Rustact will poll the file, re-parse it on change, and trigger a render so you can see your CSS edits immediately. The demo and ops dashboard both honor the flag; when the file is missing, the runtime logs a warning and keeps using the embedded stylesheet.
 
 ### Ops dashboard showcase
 
 ```bash
-cargo run --bin ops_dashboard
+cd examples/ops-dashboard
+cargo run
 ```
 
 While running:
@@ -119,7 +124,7 @@ While running:
 
 ### Styling via CSS
 
-Rustact loads `styles/demo.css` on startup. The CSS parser understands simple selectors (`element`, `element#id`, `element.class`) plus custom properties, so you can retheme the terminal UI without recompiling:
+Rustact loads a sibling `styles/demo.css` (for example `examples/rustact-demo/styles/demo.css`) on startup. The CSS parser understands simple selectors (`element`, `element#id`, `element.class`) plus custom properties, so you can retheme the terminal UI without recompiling:
 
 - `:root` defines palette tokens such as `--accent-color`, `--warning-color`, and friends that the demo injects into its `Theme` context.
 - `button#counter-plus` (and `#counter-minus`) set `accent-color` and `--filled` to control button appearance.
@@ -127,7 +132,7 @@ Rustact loads `styles/demo.css` on startup. The CSS parser understands simple se
 - `list#stats` exposes `--highlight-color` and `--max-items`, while `table#services` reads `--column-widths` and `form#release` reads `--label-width`.
 - `input`, `input#feedback-name`, etc. configure accent/border/text/background colors, while `tip.keyboard` / `.mouse` / `.context` use the standard `color` property to tint each info card.
 
-Save the file and rerun `cargo run` to see your tweaks reflected immediately.
+Save the file and rerun `cargo run` inside that example to see your tweaks reflected immediately.
 See `docs/styling.md` for a deeper dive into selectors, property types, and integration tips.
 
 ## Creating components

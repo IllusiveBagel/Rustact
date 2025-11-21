@@ -12,8 +12,8 @@ All notable changes to this project will be documented in this file. The format 
 ### Added
 - React-inspired component tree with hooks (`use_state`, `use_effect`, `use_reducer`, `use_context`, etc.) layered on top of `ratatui`.
 - Async runtime built on `tokio`, including injectable drivers for deterministic tests and structured `tracing` instrumentation.
-- Comprehensive demo plus the new `ops_dashboard` showcase that highlights tabs, modals, layered overlays, streaming logs, and toast notifications.
-- Optional CSS hot reload: set `RUSTACT_WATCH_STYLES=1` to live-reload `styles/demo.css` without restarting the app.
+- Comprehensive demo plus the new `examples/ops-dashboard` showcase that highlights tabs, modals, layered overlays, streaming logs, and toast notifications.
+- Optional CSS hot reload: set `RUSTACT_WATCH_STYLES=1` to live-reload the stylesheet that ships with each example (e.g., `examples/rustact-demo/styles/demo.css`) without restarting the app.
 - Documentation suite (guide, tutorial, styling reference, roadmap, API docs workflow) and a starter template under `templates/rustact-app/`.
 
 ### Changed

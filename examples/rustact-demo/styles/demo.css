@@ -1,0 +1,81 @@
+/* stylelint-disable */
+
+:root {
+  --accent-color: #00e8aa;
+  --warning-color: #ffb347;
+  --success-color: #7bd88f;
+  --danger-color: #ff6b6b;
+  --info-color: #7dd3fc;
+}
+
+hero {
+  color: #ff0000;
+  --subtitle-color: #8b98a8;
+}
+
+button#counter-plus {
+  accent-color: #5be7ff;
+  --filled: true;
+}
+
+button#counter-minus {
+  accent-color: #ff6b6b;
+  --filled: true;
+}
+
+panel#counter {
+  color: #9ba3af;
+}
+
+gauge#counter-progress {
+  color: #5be7ff;
+  --label: "Momentum to ±10";
+}
+
+list#stats {
+  --highlight-color: #f7b801;
+  --max-items: 12;
+}
+
+table#services {
+  --column-widths: 22 20 58;
+}
+
+form#release {
+  --label-width: 42;
+}
+
+tip.keyboard {
+  color: #5be7ff;
+}
+
+tip.mouse {
+  color: #f7b801;
+}
+
+tip.context {
+  color: #7bd88f;
+}
+
+input {
+  accent-color: #00e8ff;
+  --border-color: #4b5563;
+  --placeholder-color: #7c8dab;
+  --background-color: #101522;
+  --focus-background: #182032;
+}
+
+input#feedback-name {
+  accent-color: #7bd88f;
+}
+
+input#feedback-email {
+  accent-color: #7dd3fc;
+  --border-color: #2f3a4f;
+}
+
+input#feedback-token {
+  accent-color: #ffb347;
+  --background-color: #1a1410;
+  --focus-background: #2b1c11;
+}

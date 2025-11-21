@@ -8,7 +8,7 @@ updated = 2025-11-21
 
 # Styling Terminal UIs
 
-Rustact can reskin a terminal UI without recompilation by loading a lightweight CSS-inspired stylesheet at runtime. The demo app (`src/main.rs`) calls `Stylesheet::parse(include_str!("../styles/demo.css"))` and passes the result into `App::with_stylesheet()`. Every component receives a `Scope` that exposes the shared stylesheet, so widgets can query CSS rules as they render.
+Rustact can reskin a terminal UI without recompilation by loading a lightweight CSS-inspired stylesheet at runtime. The demo app (`examples/rustact-demo/src/main.rs`) calls `Stylesheet::parse(include_str!("../styles/demo.css"))` and passes the result into `App::with_stylesheet()`. Every component receives a `Scope` that exposes the shared stylesheet, so widgets can query CSS rules as they render.
 
 ## Selector model
 
@@ -39,7 +39,7 @@ Properties that begin with `--` are treated exactly like regular keys—the pref
 
 ## Built-in selectors and properties
 
-The demo stylesheet (`styles/demo.css`) illustrates the selectors Rustact currently consumes:
+The demo stylesheet (`examples/rustact-demo/styles/demo.css`) illustrates the selectors Rustact currently consumes:
 
 | Selector | Purpose | Properties read by the code |
 | --- | --- | --- |
@@ -91,4 +91,4 @@ gauge#counter-progress {
 }
 ```
 
-Save your changes and rerun `cargo run` to see the new palette, copy, or sizing reflected in the terminal. Pair this reference with the [developer guide](/docs/guide/) and [tutorial](/docs/tutorial/) when styling your own applications.
+Save your changes and rerun `cargo run` from inside the example (`cd examples/rustact-demo && cargo run`) to see the new palette, copy, or sizing reflected in the terminal. Pair this reference with the [developer guide](/docs/guide/) and [tutorial](/docs/tutorial/) when styling your own applications.

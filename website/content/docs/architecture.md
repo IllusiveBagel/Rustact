@@ -13,10 +13,11 @@ Rustact is a React-inspired framework for building asynchronous terminal UIs on 
 ## Quick start
 
 ```bash
+cd examples/rustact-demo
 cargo run
 ```
 
-The demo (`src/main.rs`) launches a multi-pane dashboard:
+The demo (`examples/rustact-demo/src/main.rs`) launches a multi-pane dashboard:
 - `Hero` component displays instructions and shared theme colors.
 - `Counter` shows state updates, memoized summaries, and a progress gauge for ±10.
 - `Stats` keeps a scrolling list of the five most recent framework events.
@@ -45,7 +46,7 @@ The demo (`src/main.rs`) launches a multi-pane dashboard:
 | `src/context/mod.rs` | Type-safe provider stack (push/pop via guards). |
 | `src/events/mod.rs` | Framework event definitions, broadcast bus, Ctrl+C detection. |
 | `src/renderer/mod.rs` | `ratatui` adapter that turns `View` structs into widgets. |
-| `src/main.rs` | Demo app wiring components together. |
+| `examples/rustact-demo/src/main.rs` | Demo app wiring components together. |
 
 ## Components and elements
 
@@ -392,7 +393,7 @@ let app = App::new("FastTicks", root_component).with_config(config);
 
 ## Useful references
 
-- [`src/main.rs`](https://github.com/IllusiveBagel/rustact/blob/main/src/main.rs) – concrete example tying everything together.
+- [`examples/rustact-demo/src/main.rs`](https://github.com/IllusiveBagel/rustact/blob/main/examples/rustact-demo/src/main.rs) – concrete example tying everything together.
 - [`src/hooks/mod.rs`](https://github.com/IllusiveBagel/rustact/blob/main/src/hooks/mod.rs) – hook lifecycle implementation details.
 - [`ratatui` docs](https://docs.rs/ratatui/latest/ratatui/) – widget and layout primitives.
 - [`crossterm` docs](https://docs.rs/crossterm/latest/crossterm/) – keyboard/mouse event reference.

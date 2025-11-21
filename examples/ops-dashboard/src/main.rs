@@ -14,7 +14,7 @@ use rustact::{
 };
 
 const APP_NAME: &str = "Rustact Ops Dashboard";
-const OPS_STYLES: &str = include_str!("../../styles/demo.css");
+const OPS_STYLES: &str = include_str!("../styles/demo.css");
 const OPS_STYLES_PATH: &str = "styles/demo.css";
 
 #[tokio::main]

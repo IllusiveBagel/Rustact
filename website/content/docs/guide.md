@@ -27,7 +27,7 @@ cargo --version
 
 ```bash
 git clone https://github.com/IllusiveBagel/rustact.git
-cd rustact
+cd rustact/examples/rustact-demo
 cargo run
 ```
 
@@ -35,6 +35,8 @@ While the demo is running:
 - `+` / `-` / `r` keys or the on-screen buttons drive the counter.
 - Tabs cycle between text inputs; mouse clicks focus individual fields.
 - `Ctrl+C` exits immediately.
+
+Run `cd ../ops-dashboard && cargo run` for the ops showcase. See `examples/README.md` for more details on both apps.
 
 ## 3. Project layout
 
@@ -46,7 +48,7 @@ While the demo is running:
 | `src/events/` | `FrameworkEvent`, broadcast bus, helpers for Ctrl+C and mouse detection. |
 | `src/interactions.rs` | Global hitbox registry for buttons and inputs. |
 | `src/text_input/` | Text input bindings, state machine, and validation hooks. |
-| `styles/demo.css` | Runtime stylesheet loaded by the demo app. |
+| `examples/rustact-demo/styles/demo.css` | Runtime stylesheet loaded by the main demo app. |
 | `docs/` | Architecture notes, styling reference, roadmap, tutorial, and this guide (legacy Markdown copies). |
 
 ## 4. Everyday workflows
@@ -54,8 +56,11 @@ While the demo is running:
 ### Running & iterating
 
 ```bash
-cargo run                  # launch the demo
-RUSTACT_WATCH_STYLES=1 cargo run  # optional: live reload styles/demo.css
+cd examples/rustact-demo
+cargo run                        # launch the main demo
+RUSTACT_WATCH_STYLES=1 cargo run  # optional: live reload demo styles/demo.css
+cd ../ops-dashboard
+cargo run                        # launch the ops showcase
 cargo fmt && cargo clippy  # format + lint changes
 cargo test                 # run the growing unit-test suite
 ```
@@ -65,7 +70,7 @@ Use `RUST_LOG=debug` once tracing is added (see the [roadmap](/docs/roadmap/)) t
 ### Hot-edit cycle
 
 1. Modify a component or hook.
-2. `cargo run` to preview terminal output.
+2. `cargo run` inside the example you're iterating (`examples/rustact-demo` or `examples/ops-dashboard`).
 3. Watch the stats panel to confirm framework events are emitted as expected.
 4. Keep `cargo test` handy—many modules (hooks, events, text input) already ship with unit tests.
 
@@ -95,8 +100,8 @@ Scope exposes additional helpers (`dispatcher`, `styles`, `use_text_input_valida
 ## 7. Styling & theming
 
 - Stylesheets use a compact CSS subset (type/id/class selectors plus `:root`).
-- Load them from disk with `Stylesheet::from_file("styles/demo.css")` (falls back to embedded CSS when missing) and pass them to `App::with_stylesheet(...)`.
-- Toggle hot reload by setting `RUSTACT_WATCH_STYLES=1` (or `true`/`on`); the runtime will poll `styles/demo.css`, re-parse on change, and schedule a redraw without restarting the process.
+- Load them from disk with `Stylesheet::from_file("styles/demo.css")` inside each example crate (the file lives next to its binary) and pass them to `App::with_stylesheet(...)`.
+- Toggle hot reload by setting `RUSTACT_WATCH_STYLES=1` (or `true`/`on`); the runtime will poll the sibling `styles/demo.css`, re-parse on change, and schedule a redraw without restarting the process.
 - Query inside components with `ctx.styles().query(StyleQuery::element("button").with_id("counter-plus"))`.
 - See the [styling reference](/docs/styling/) for supported selectors, properties, and examples.
 

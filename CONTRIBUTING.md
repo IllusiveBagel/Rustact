@@ -34,7 +34,7 @@ Thanks for helping improve Rustact! This document summarizes the expectations, t
 ## Coding standards
 
 - **Edition & style**: Rust 2024, formatted with `cargo fmt`. Apply clippy suggestions unless they conflict with readability; otherwise add explicit `#[allow(...)]` explaining why.
-- **Testing**: Prefer unit tests near the code under test. Integration/UI changes should update the demo in `src/main.rs` or add coverage in `src/runtime/tests`.
+- **Testing**: Prefer unit tests near the code under test. Integration/UI changes should update the demo in `examples/rustact-demo/src/main.rs` (or add coverage in `src/runtime/tests`).
 - **Docs**: Update README/docs when you add features, flags, or behavior. Include changelog entries in `CHANGELOG.md` under the `Unreleased` section.
 - **Error handling**: Use `anyhow::Context` for fallible operations at the app boundary and `thiserror`-style enums inside libraries. Avoid `unwrap()`/`expect()` unless the condition truly cannot fail.
 - **Logging**: Favor `tracing` macros (`trace!`, `info!`, etc.) over `println!`.

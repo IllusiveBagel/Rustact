@@ -18,8 +18,8 @@ This project publishes tagged releases to GitHub (and eventually crates.io). Use
    cargo doc --no-deps
    ```
 4. **Smoke test binaries**
-   - `cargo run` (demo app)
-   - `cargo run --bin ops_dashboard`
+   - `cd examples/rustact-demo && cargo run` (demo app)
+   - `cd examples/ops-dashboard && cargo run`
 5. **Commit & push**
    ```bash
    git commit -am "Release v0.x.y"

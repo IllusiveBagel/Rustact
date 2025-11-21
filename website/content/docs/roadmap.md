@@ -28,7 +28,7 @@ This document captures the current state of the project and highlights the most 
 
 ## 3. Feature Depth & Showcase Apps
 
-- ✅ Built the `ops_dashboard` showcase binary that streams logs, simulates deployments, switches tabs, and displays incident modals/toasts.
+- ✅ Built the `examples/ops-dashboard` showcase crate that streams logs, simulates deployments, switches tabs, and displays incident modals/toasts.
 - ✅ Added missing widgets/components (`TabsNode`, `ModalNode`, `LayeredNode`, `ToastStackNode`) so dashboards can express overlays and notifications without bespoke rendering.
 - Next: demonstrate richer inter-component messaging patterns (e.g., global command palette) to highlight the event bus and context primitives.
 - Future stretch: add a data-entry heavy showcase (forms + validation + keyboard navigation) to balance the ops dashboard.
@@ -37,7 +37,7 @@ This document captures the current state of the project and highlights the most 
 
 - Integrate an in-app diagnostics panel showing render frequency, hook counts, event throughput, and memory stats.
 - Emit performance metrics to logs (render duration, diff counts) to spot regressions and feed the diagnostics panel.
-- ✅ Added optional CSS hot-reload: set `RUSTACT_WATCH_STYLES` to watch `styles/demo.css` and update the runtime without restarting the app.
+- ✅ Added optional CSS hot-reload: set `RUSTACT_WATCH_STYLES` to watch the stylesheet next to each example binary (e.g., `examples/rustact-demo/styles/demo.css`) and update the runtime without restarting the app.
 - Plan: surface tracing spans via `tracing` layers or JSON logs for easier ingestion in external tooling.
 
 ## 5. Packaging & Distribution

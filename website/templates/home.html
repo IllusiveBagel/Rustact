@@ -45,8 +45,8 @@
         <h3>Quick start</h3>
         <p>Spin up the demo and opt into live style reloads.</p>
         <pre><code>git clone https://github.com/IllusiveBagel/rustact
-cd rustact
-RUSTACT_WATCH_STYLES=1 cargo run</code></pre>
+      cd rustact/examples/rustact-demo
+      RUSTACT_WATCH_STYLES=1 cargo run</code></pre>
         <p>Prefer a fresh project? Use the bundled template:</p>
         <pre><code>cargo install cargo-generate
 cargo generate \
@@ -84,7 +84,7 @@ cargo generate \
         <p>Compose lists, tables, trees, forms, gauges, text inputs, tabs, modal overlays, toast stacks, and layered layouts without bespoke renderer code.</p>
         <ul>
           <li>Mouse hitboxes for buttons/inputs.</li>
-          <li>CSS-inspired styling with <code>styles/demo.css</code>.</li>
+          <li>CSS-inspired styling with <code>examples/rustact-demo/styles/demo.css</code>.</li>
           <li>Live reload styles via <code>RUSTACT_WATCH_STYLES</code>.</li>
         </ul>
       </article>
@@ -149,7 +149,7 @@ cargo generate \
       <article class="showcase-card">
         <h3>Ops dashboard</h3>
         <p>Streams faux deployments/logs, offers tab navigation, modal overlays for incidents, toast notifications, and layered layouts for alerts.</p>
-        <p><strong>Run:</strong> <code>cargo run --bin ops_dashboard</code></p>
+        <p><strong>Run:</strong> <code>cd examples/ops-dashboard && cargo run</code></p>
       </article>
     </div>
   </section>
