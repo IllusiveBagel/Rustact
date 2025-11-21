@@ -291,9 +291,34 @@ section .eyebrow {
   margin-bottom: 12px;
 }
 
+.doc-body p {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.doc-body pre {
+  background: #040c14;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  overflow-x: auto;
+  font-size: 0.95rem;
+  margin: 24px 0;
+}
+
+.doc-body code {
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  color: var(--accent-alt);
+}
+
+.doc-body pre code {
+  color: inherit;
+}
+
 .doc-body ul,
 .doc-body ol {
   padding-left: 24px;
+  margin-bottom: 24px;
 }
 
 .doc-body table {
@@ -314,6 +339,13 @@ section .eyebrow {
   padding: 16px 20px;
   border-left: 3px solid var(--accent);
   background: rgba(91, 231, 255, 0.08);
+}
+
+.doc-body hr {
+  border: none;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.2);
+  margin: 48px 0;
 }
 
 .doc-toc {
