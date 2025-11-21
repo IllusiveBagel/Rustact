@@ -29,7 +29,7 @@ jobs:
       - name: Build marketing site
         run: |
           rm -rf site-dist
-          zola build --root website --output-dir site-dist
+          (cd website && zola build --output-dir ../site-dist)
       - name: Build API docs
         run: cargo doc --no-deps
       - name: Bundle API docs
