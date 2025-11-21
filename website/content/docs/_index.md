@@ -1,4 +1,4 @@
-++
++++
 title = "Docs"
 template = "docs.html"
 description = "Guides, tutorials, and references for building async TUIs with Rustact."
