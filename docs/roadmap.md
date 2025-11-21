@@ -2,18 +2,21 @@
 
 This document captures the current state of the project and highlights the most impactful directions to pursue next. Revisit and adjust as priorities shift.
 
-## 1. Developer Experience & Documentation
+## 1. Adoption & Documentation
 
-- Extend the starter template with the ops dashboard patterns (tabs, overlays, toasts) so new apps can opt in quickly.
-- Bundle a troubleshooting appendix into `docs/guide.md` (common tracing filters, style reload flags, terminal quirks).
-- Keep the docs in sync with upcoming diagnostics tooling (section 4) once APIs stabilize.
+- Publish an "Introduction" section in `docs/guide.md` that mirrors the crates.io quick start (`cargo add rustact`, minimal component example).
+- Expand the starter template to optionally scaffold the ops dashboard widgets so new apps can opt into overlays/toasts immediately.
+- Add a troubleshooting appendix covering tracing filters, terminal quirks, and style hot-reload gotchas.
+- Keep docs aligned with forthcoming diagnostics tooling (section 4) so new APIs never ship undocumented.
 
 ## 2. Runtime Ergonomics & Reliability
 
 - ✅ Abstracted the terminal/tick/shutdown tasks behind the `RuntimeDriver` trait; `App::with_driver` now injects mocks for deterministic tests (see `runtime/tests/app.rs`).
 - ✅ Improved shutdown handling by aborting and awaiting runtime tasks, logging ctrl-c detection, and surfacing renderer errors.
 - ✅ Added `tracing` instrumentation across the runtime, dispatcher, event bus, and background tasks for structured debugging.
-- Next: prototype a headless driver (no terminal) to unlock CI snapshots and in-memory render diffing; evaluate guardrails for runaway tasks (timeouts, panic propagation).
+- ✅ Added a headless renderer mode so tests (and future CLI tools) can render without touching the terminal.
+- Next: capture deterministic render snapshots (e.g., JSON diff or ANSI frame dump) to enable golden tests and docs previews.
+- Next: add guardrails for runaway background tasks (timeouts, panic bubbling) plus a feature-flagged `tokio::task::Builder` hook for custom error reporting.
 
 ## 3. Feature Depth & Showcase Apps
 
@@ -25,23 +28,25 @@ This document captures the current state of the project and highlights the most 
 ## 4. Tooling & Observability
 
 - Integrate an in-app diagnostics panel showing render frequency, hook counts, event throughput, and memory stats.
-- Emit performance metrics to logs (render duration, diff counts) to spot regressions.
+- Emit performance metrics to logs (render duration, diff counts) to spot regressions and feed the diagnostics panel.
 - ✅ Added optional CSS hot-reload: set `RUSTACT_WATCH_STYLES` to watch `styles/demo.css` and update the runtime without restarting the app.
 - Plan: surface tracing spans via `tracing` layers or JSON logs for easier ingestion in external tooling.
 
 ## 5. Packaging & Distribution
 
-- ✅ Polished `Cargo.toml` metadata (license, repository, keywords) and started a `CHANGELOG.md` for semantic releases.
-- Evaluate publishing prebuilt demo binaries or a `rustact` CLI that wraps `cargo run` plus asset watching.
-- Draft a release checklist (tests, fmt, clippy, doc build, CHANGELOG update) and publish guidance before the first crates.io release.
-- Decide on dual licensing (MIT/Apache-2.0) and add the corresponding `LICENSE` files if needed for broader adoption.
+- ✅ Polished `Cargo.toml` metadata, LICENSE, and CHANGELOG.
+- ✅ Published `rustact` v0.1.0 to crates.io (see [crates.io/crates/rustact](https://crates.io/crates/rustact)).
+- Evaluate publishing prebuilt demo binaries or a lightweight `rustact` CLI (`rustact dev --watch`) to simplify local workflows.
+- Add docs.rs badges + feature tables so crate consumers can see API status at a glance.
+- Investigate template distribution via `cargo-generate` registry (list `rustact-app` as a template repo).
 
-## 6. Release Readiness
+## 6. Release & Governance
 
-- Establish semantic versioning rules (what constitutes breaking runtime API changes vs. additive widget updates).
-- Automate verification: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo doc --no-deps`.
-- Gate main with CI once the publishing process is defined.
+- ✅ Automated verification + release workflow (fmt, clippy, tests, docs, package, optional publish) triggered on `v*` tags.
+- Define semantic versioning rules (what breaks `App`/`Element` APIs vs. additive widget changes) and document them in `RELEASE.md`.
+- Add CODEOWNERS + branch protections that require review before release tagging.
+- Once diagnostics + CLI land, plan a v0.2 roadmap review before the next tag.
 
 ---
 
-**Next Review:** Reassess after completing two major items from sections 1–3 or when preparing a public release.
+**Next Review:** Reassess after shipping the diagnostics panel (section 4) and starter template upgrades (section 1), or ahead of the v0.2 release planning session.

@@ -2,8 +2,15 @@
 
 [![CI](https://github.com/IllusiveBagel/rustact/actions/workflows/ci.yml/badge.svg)](https://github.com/IllusiveBagel/rustact/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/IllusiveBagel/rustact?include_prereleases&label=release)](https://github.com/IllusiveBagel/rustact/releases)
+[![Crates.io](https://img.shields.io/crates/v/rustact.svg)](https://crates.io/crates/rustact)
 
 Rustact is an experimental, React-inspired framework for building async terminal UIs in Rust. It layers a component/hook system on top of `ratatui`, offering familiar primitives such as components, state, effects, context, and an event bus.
+
+Install from crates.io:
+
+```bash
+cargo add rustact
+```
 
 ## Community & contributions
 
