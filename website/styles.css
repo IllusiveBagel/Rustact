@@ -101,6 +101,35 @@ nav .links a:hover {
   gap: 16px;
 }
 
+.stat-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat {
+  background: rgba(4, 12, 20, 0.6);
+  border: 1px solid rgba(91, 231, 255, 0.15);
+  border-radius: 16px;
+  padding: 12px 16px;
+}
+
+.stat span {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.stat a {
+  color: var(--accent-alt);
+  text-decoration: none;
+  font-weight: 600;
+}
+
 .button-primary,
 .button-ghost {
   border-radius: 999px;
@@ -154,6 +183,19 @@ nav .links a:hover {
   color: var(--muted);
 }
 
+.card a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link-row {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
 section {
   margin-top: 72px;
 }
@@ -161,6 +203,12 @@ section {
 section h2 {
   font-size: 2rem;
   margin-bottom: 16px;
+}
+
+.section-lede {
+  color: var(--muted);
+  max-width: 720px;
+  margin-bottom: 32px;
 }
 
 section .eyebrow {
@@ -195,6 +243,25 @@ code {
   padding: 24px;
   background: linear-gradient(135deg, rgba(0, 232, 170, 0.08), rgba(91, 231, 255, 0.1));
   border: 1px solid rgba(0, 232, 170, 0.1);
+}
+
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.roadmap-card {
+  background: rgba(5, 7, 11, 0.85);
+  border-radius: 20px;
+  border: 1px solid rgba(91, 231, 255, 0.12);
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.roadmap-card ul {
+  padding-left: 20px;
+  color: var(--muted);
 }
 
 footer {

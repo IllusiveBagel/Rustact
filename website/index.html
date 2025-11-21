@@ -16,8 +16,10 @@
           <a class="brand" href="#top">Rustact</a>
           <div class="links">
             <a href="#features">Features</a>
+            <a href="#docs">Docs</a>
             <a href="#showcase">Showcase</a>
-            <a href="#get-started">Get Started</a>
+            <a href="#roadmap">Roadmap</a>
+            <a href="#community">Community</a>
             <a href="https://github.com/IllusiveBagel/rustact" target="_blank" rel="noreferrer">GitHub</a>
             <a href="./api/rustact/index.html">API Docs</a>
           </div>
@@ -32,6 +34,20 @@
             <div class="hero-cta">
               <a class="button-primary" href="https://github.com/IllusiveBagel/rustact" target="_blank" rel="noreferrer">Star on GitHub</a>
               <a class="button-ghost" href="./api/rustact/index.html">Browse API docs →</a>
+            </div>
+            <div class="stat-grid">
+              <div class="stat">
+                <span>Crate</span>
+                <a href="https://crates.io/crates/rustact" target="_blank" rel="noreferrer">crates.io/crates/rustact</a>
+              </div>
+              <div class="stat">
+                <span>Docs</span>
+                <a href="https://illusivebagel.github.io/rustact/api/rustact/index.html">Hosted on GitHub Pages</a>
+              </div>
+              <div class="stat">
+                <span>Source</span>
+                <a href="https://github.com/IllusiveBagel/rustact" target="_blank" rel="noreferrer">github.com/IllusiveBagel/rustact</a>
+              </div>
             </div>
           </div>
           <div class="card">
@@ -93,6 +109,43 @@ cargo generate \
         </div>
       </section>
 
+      <section id="docs">
+        <p class="eyebrow">Docs & learning</p>
+        <h2>One-stop knowledge base for builders.</h2>
+        <p class="section-lede">All written guides live in the repo, but the highlights are just a click away.</p>
+        <div class="card-grid">
+          <article class="card">
+            <h3>Developer guide</h3>
+            <p>Day-to-day workflows, environment setup, hook primer, and tracing tips.</p>
+            <div class="link-row">
+              <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/guide.md" target="_blank" rel="noreferrer">Read guide →</a>
+            </div>
+          </article>
+          <article class="card">
+            <h3>Tutorial</h3>
+            <p>Build a mini app from scratch: components, dispatcher events, styling, and form validation.</p>
+            <div class="link-row">
+              <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/tutorial.md" target="_blank" rel="noreferrer">Follow tutorial →</a>
+            </div>
+          </article>
+          <article class="card">
+            <h3>Architecture & styling</h3>
+            <p>Dive into runtime internals, renderer, hooks, and the CSS-inspired style system.</p>
+            <div class="link-row">
+              <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/architecture.md" target="_blank" rel="noreferrer">Architecture →</a>
+              <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/styling.md" target="_blank" rel="noreferrer">Styling →</a>
+            </div>
+          </article>
+          <article class="card">
+            <h3>API docs</h3>
+            <p>Browse rustdoc output without cloning the repo. Every exported type is documented online.</p>
+            <div class="link-row">
+              <a href="./api/rustact/index.html">Explore rustdoc →</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="showcase">
         <p class="eyebrow">Live examples</p>
         <h2>Showcase apps highlight real workflows.</h2>
@@ -135,9 +188,81 @@ cargo generate \
         </div>
       </section>
 
+      <section id="roadmap">
+        <p class="eyebrow">Roadmap</p>
+        <h2>Upcoming focus areas</h2>
+        <p class="section-lede">We ship everything in the open. Track priorities at a glance and dive into the <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/roadmap.md" target="_blank" rel="noreferrer">living roadmap</a>.</p>
+        <div class="roadmap-grid">
+          <article class="roadmap-card">
+            <h3>Adoption & docs</h3>
+            <ul>
+              <li>Starter template upgrades (ops dashboard patterns on demand).</li>
+              <li>Troubleshooting appendix (tracing filters, terminals, styles).</li>
+              <li>Docs.rs + crates.io badges everywhere.</li>
+            </ul>
+          </article>
+          <article class="roadmap-card">
+            <h3>Runtime ergonomics</h3>
+            <ul>
+              <li>Deterministic render snapshots for golden tests.</li>
+              <li>Task guardrails & panic surfacing in injected drivers.</li>
+              <li>Headless tooling for CI previews.</li>
+            </ul>
+          </article>
+          <article class="roadmap-card">
+            <h3>Tooling & diagnostics</h3>
+            <ul>
+              <li>In-app diagnostics HUD showing render/event stats.</li>
+              <li>Performance metrics emitted via tracing layers.</li>
+              <li>CLI helpers for style watching + template generation.</li>
+            </ul>
+          </article>
+          <article class="roadmap-card">
+            <h3>Packaging & releases</h3>
+            <ul>
+              <li>Automated crates.io publish on `v*` tags (already live).</li>
+              <li>Prebuilt demo binaries / `rustact` CLI exploration.</li>
+              <li>Versioning guidance for runtime vs. widget changes.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="community">
+        <p class="eyebrow">Community</p>
+        <h2>Join the effort</h2>
+        <div class="card-grid">
+          <article class="card">
+            <h3>Contribute</h3>
+            <p>We welcome issues and PRs! Start with the <a href="https://github.com/IllusiveBagel/rustact/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer">contributing guide</a> and follow the <a href="https://github.com/IllusiveBagel/rustact/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noreferrer">code of conduct</a>.</p>
+            <ul>
+              <li>Run fmt, clippy (<code>-D warnings</code>), tests, docs.</li>
+              <li>Update CHANGELOG + docs when behavior shifts.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Automation</h3>
+            <p>`ci.yml` enforces fmt/clippy/tests/docs on PRs, while the release workflow packages the crate, uploads artifacts, and can publish to crates.io when a token is configured.</p>
+            <ul>
+              <li>Tag releases with <code>v*</code> to trigger automation.</li>
+              <li>Docs + marketing site deploy via GitHub Pages.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Stay up to date</h3>
+            <p>Track progress on the roadmap, follow releases on GitHub, or watch the crate on crates.io to get notified about new versions.</p>
+            <ul>
+              <li><a href="https://crates.io/crates/rustact" target="_blank" rel="noreferrer">Crate page</a></li>
+              <li><a href="https://github.com/IllusiveBagel/rustact/releases" target="_blank" rel="noreferrer">Release notes</a></li>
+              <li><a href="https://github.com/IllusiveBagel/rustact/blob/main/MAINTAINERS.md" target="_blank" rel="noreferrer">Maintainers</a></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
       <footer>
         <p>
-          Built with ❤️ in Rust. View the source on <a href="https://github.com/IllusiveBagel/rustact" target="_blank" rel="noreferrer">GitHub</a> · API docs available under <a href="./api/rustact/index.html">/api</a>.
+          Built with ❤️ in Rust. View the source on <a href="https://github.com/IllusiveBagel/rustact" target="_blank" rel="noreferrer">GitHub</a>, install from <a href="https://crates.io/crates/rustact" target="_blank" rel="noreferrer">crates.io</a>, and browse API docs under <a href="./api/rustact/index.html">/api</a>.
         </p>
       </footer>
     </div>
