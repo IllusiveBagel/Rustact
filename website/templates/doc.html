@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <article class="doc-page">
+    <header class="doc-page-header">
+      <a class="back-link" href="{{ get_url(path="/docs") }}">← Docs overview</a>
+      <p class="eyebrow">Documentation</p>
+      <h1>{{ page.title }}</h1>
+      {% if page.description %}
+        <p class="section-lede">{{ page.description }}</p>
+      {% endif %}
+    </header>
+
+    <div class="doc-layout">
+      <div class="doc-body">
+        {{ page.content | safe }}
+      </div>
+      {% if page.toc and page.toc | length > 0 %}
+        <aside class="doc-toc">
+          <strong>On this page</strong>
+          <ul>
+            {% for h in page.toc %}
+              <li>
+                <a href="#{{ h.id }}">{{ h.title }}</a>
+                {% if h.children and h.children | length > 0 %}
+                  <ul>
+                    {% for child in h.children %}
+                      <li><a href="#{{ child.id }}">{{ child.title }}</a></li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </aside>
+      {% endif %}
+    </div>
+  </article>
+{% endblock content %}

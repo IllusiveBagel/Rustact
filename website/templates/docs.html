@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <header class="docs-header">
+    <nav>
+      <a class="brand" href="{{ get_url(path="/") }}">Rustact</a>
+      <div class="links">
+        <a href="{{ get_url(path="/") }}#features">Features</a>
+        <a href="{{ get_url(path="/") }}#docs">Docs</a>
+        <a href="{{ get_url(path="/") }}#roadmap">Roadmap</a>
+        <a href="{{ get_url(path="/") }}#community">Community</a>
+        <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="/api/rustact/index.html">API Docs</a>
+      </div>
+    </nav>
+    <section class="docs-hero">
+      <p class="eyebrow">Documentation</p>
+      <h1>{{ section.title | default(value="Docs") }}</h1>
+      <p>
+        {{ section.description | default(value="Guides, tutorials, and references for building async TUIs with Rustact.") }}
+      </p>
+    </section>
+  </header>
+
+  <section class="docs-section">
+    {% set docs = section.pages %}
+    {% if docs | length > 0 %}
+      <div class="docs-grid">
+        {% for doc in docs %}
+          <article class="card doc-card">
+            <h3><a href="{{ doc.permalink | safe }}">{{ doc.title }}</a></h3>
+            {% if doc.description %}
+              <p>{{ doc.description }}</p>
+            {% elif doc.summary %}
+              <p>{{ doc.summary | safe }}</p>
+            {% else %}
+              <p>{{ doc.content | striptags | truncate(length=180) }}</p>
+            {% endif %}
+            <div class="doc-meta">
+              <span>~{{ doc.reading_time }} min read</span>
+              {% if doc.updated %}
+                <span>Updated {{ doc.updated | date(format="%b %d, %Y") }}</span>
+              {% else %}
+                <span>Added {{ doc.date | date(format="%b %d, %Y") }}</span>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <article class="card docs-empty">
+        <h3>Docs are migrating</h3>
+        <p>
+          The guides still live in <a href="{{ config.extra.repo_url }}/tree/main/docs" target="_blank" rel="noreferrer">/docs</a> for now, but we are actively moving them into this site.
+          Use the quick links below if you need the existing Markdown versions.
+        </p>
+        <div class="link-row">
+          <a href="{{ config.extra.repo_url }}/blob/main/docs/guide.md" target="_blank" rel="noreferrer">Developer guide →</a>
+          <a href="{{ config.extra.repo_url }}/blob/main/docs/tutorial.md" target="_blank" rel="noreferrer">Tutorial →</a>
+          <a href="{{ config.extra.repo_url }}/blob/main/docs/architecture.md" target="_blank" rel="noreferrer">Architecture →</a>
+          <a href="{{ config.extra.repo_url }}/blob/main/docs/styling.md" target="_blank" rel="noreferrer">Styling →</a>
+          <a href="{{ config.extra.repo_url }}/blob/main/docs/roadmap.md" target="_blank" rel="noreferrer">Roadmap →</a>
+        </div>
+      </article>
+    {% endif %}
+  </section>
+{% endblock content %}

@@ -1,0 +1,14 @@
+base_url = "/"
+compile_sass = false
+build_search_index = true
+minify_html = true
+title = "Rustact"
+description = "Async terminal UI framework with React-inspired components, hooks, and tracing."
+
+[markdown]
+highlight_code = true
+
+[extra]
+repo_url = "https://github.com/IllusiveBagel/rustact"
+crate_url = "https://crates.io/crates/rustact"
+docs_url = "https://illusivebagel.github.io/rustact/api/rustact/index.html"

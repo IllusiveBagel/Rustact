@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Rustact – Async terminal UI framework with React-inspired components, hooks, and tracing."
+    />
+    <title>
+      {% if page.title %}{{ page.title }} · {{ config.title }}{% else %}{{ config.title }} · Async Terminal UI Framework{% endif %}
+    </title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="{{ get_url(path="styles.css") }}" />
+  </head>
+  <body>
+    <div class="page">
+      {% block content %}{% endblock content %}
+    </div>
+  </body>
+</html>

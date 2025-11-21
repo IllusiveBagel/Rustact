@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <header>
+    <nav>
+      <a class="brand" href="#top">Rustact</a>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#docs">Docs</a>
+        <a href="#showcase">Showcase</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#community">Community</a>
+        <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="/api/rustact/index.html">API Docs</a>
+      </div>
+    </nav>
+    <section class="hero" id="top">
+      <div>
+        <span class="tagline">Async terminal UI framework</span>
+        <h1>Build immersive TUI apps with React-like ergonomics.</h1>
+        <p>
+          Rustact pairs a component/hook system with a high-performance Tokio runtime and Ratatui renderer. Compose widgets,
+          wire async effects, and ship observability-friendly terminal apps that feel modern.
+        </p>
+        <div class="hero-cta">
+          <a class="button-primary" href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">Star on GitHub</a>
+          <a class="button-ghost" href="/api/rustact/index.html">Browse API docs →</a>
+        </div>
+        <div class="stat-grid">
+          <div class="stat">
+            <span>Crate</span>
+            <a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">crates.io/rustact</a>
+          </div>
+          <div class="stat">
+            <span>Docs</span>
+            <a href="{{ config.extra.docs_url }}" target="_blank" rel="noreferrer">Hosted on GitHub Pages</a>
+          </div>
+          <div class="stat">
+            <span>Source</span>
+            <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">github.com/IllusiveBagel/rustact</a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Quick start</h3>
+        <p>Spin up the demo and opt into live style reloads.</p>
+        <pre><code>git clone https://github.com/IllusiveBagel/rustact
+cd rustact
+RUSTACT_WATCH_STYLES=1 cargo run</code></pre>
+        <p>Prefer a fresh project? Use the bundled template:</p>
+        <pre><code>cargo install cargo-generate
+cargo generate \
+  --git https://github.com/IllusiveBagel/rustact \
+  --path templates/rustact-app \
+  --name my-rustact-app</code></pre>
+      </div>
+    </section>
+  </header>
+
+  <section id="features">
+    <p class="eyebrow">Why Rustact</p>
+    <h2>Everything you need to craft feature-rich TUIs.</h2>
+    <div class="card-grid">
+      <article class="card">
+        <h3>Component & hook system</h3>
+        <p>Build apps with <code>component("Name", render_fn)</code> plus familiar hooks (<code>use_state</code>, <code>use_reducer</code>, <code>use_effect</code>, <code>use_context</code>, <code>use_text_input</code>).</p>
+        <ul>
+          <li>Stateful views with memoized callbacks.</li>
+          <li>Provide/consume context for shared themes.</li>
+          <li>Text input bindings with validation helpers.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Async runtime & driver injection</h3>
+        <p>Tokio-driven runtime handles terminal IO, ticks, events, and effect scheduling—with pluggable drivers for deterministic tests or headless mode.</p>
+        <ul>
+          <li>Structured tracing for renders/events/shutdown.</li>
+          <li>Graceful task abort & Ctrl+C logging.</li>
+          <li>Test-friendly <code>RuntimeDriver</code> trait.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Rich widget catalog</h3>
+        <p>Compose lists, tables, trees, forms, gauges, text inputs, tabs, modal overlays, toast stacks, and layered layouts without bespoke renderer code.</p>
+        <ul>
+          <li>Mouse hitboxes for buttons/inputs.</li>
+          <li>CSS-inspired styling with <code>styles/demo.css</code>.</li>
+          <li>Live reload styles via <code>RUSTACT_WATCH_STYLES</code>.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Docs, template & automation</h3>
+        <p>Comprehensive guides, tutorial, styling reference, API docs workflow, and a ready-to-run starter template.</p>
+        <ul>
+          <li>GitHub Pages deploy with API docs bundled.</li>
+          <li><code>CHANGELOG.md</code> + release checklist.</li>
+          <li>Starter template mirrors demo patterns.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section id="docs">
+    <p class="eyebrow">Docs & learning</p>
+    <h2>One-stop knowledge base for builders.</h2>
+    <p class="section-lede">All written guides live in the repo today, but the highlights are just a click away. We’re migrating this content into the site so you can stay here for the full deep dive.</p>
+    <div class="card-grid">
+      <article class="card">
+        <h3>Developer guide</h3>
+        <p>Day-to-day workflows, environment setup, hook primer, and tracing tips.</p>
+        <div class="link-row">
+          <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/guide.md" target="_blank" rel="noreferrer">Read guide →</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>Tutorial</h3>
+        <p>Build a mini app from scratch: components, dispatcher events, styling, and form validation.</p>
+        <div class="link-row">
+          <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/tutorial.md" target="_blank" rel="noreferrer">Follow tutorial →</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>Architecture & styling</h3>
+        <p>Dive into runtime internals, renderer, hooks, and the CSS-inspired style system.</p>
+        <div class="link-row">
+          <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/architecture.md" target="_blank" rel="noreferrer">Architecture →</a>
+          <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/styling.md" target="_blank" rel="noreferrer">Styling →</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>API docs</h3>
+        <p>Browse rustdoc output without cloning the repo. Every exported type is documented online.</p>
+        <div class="link-row">
+          <a href="/api/rustact/index.html">Explore rustdoc →</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="showcase">
+    <p class="eyebrow">Live examples</p>
+    <h2>Showcase apps highlight real workflows.</h2>
+    <div class="showcase">
+      <article class="showcase-card">
+        <h3>Demo playground</h3>
+        <p>Exercise every built-in hook, widget, and style selector in one place—counters, stats panel, services table, project tree, forms, text inputs, and themed tips.</p>
+        <p><strong>Highlights:</strong> memoized reducers, dispatcher events, CSS tokens, mouse + keyboard interactions.</p>
+      </article>
+      <article class="showcase-card">
+        <h3>Ops dashboard</h3>
+        <p>Streams faux deployments/logs, offers tab navigation, modal overlays for incidents, toast notifications, and layered layouts for alerts.</p>
+        <p><strong>Run:</strong> <code>cargo run --bin ops_dashboard</code></p>
+      </article>
+    </div>
+  </section>
+
+  <section id="get-started">
+    <p class="eyebrow">Build now</p>
+    <h2>From prototype to production.</h2>
+    <div class="card-grid">
+      <article class="card">
+        <h3>Read the guides</h3>
+        <p>Dive into the architecture overview, developer guide, styling reference, and tutorial.</p>
+        <div class="hero-cta" style="margin-top: 16px">
+          <a class="button-ghost" href="https://github.com/IllusiveBagel/rustact/tree/main/docs" target="_blank" rel="noreferrer">Open docs →</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>Inspect the API surface</h3>
+        <p>Every exported type lives inside the bundled API docs; jump straight into <code>rustact::runtime</code>, hooks, renderer, and components.</p>
+        <div class="hero-cta" style="margin-top: 16px">
+          <a class="button-primary" href="/api/rustact/index.html">Explore API docs</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>Instrument & ship</h3>
+        <p>Enable tracing subscribers, watch styles live, and wire CI to run fmt, clippy (<code>-D warnings</code>), tests, and docs before release.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <p class="eyebrow">Roadmap</p>
+    <h2>Upcoming focus areas</h2>
+    <p class="section-lede">We ship everything in the open. Track priorities at a glance and dive into the <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/roadmap.md" target="_blank" rel="noreferrer">living roadmap</a>.</p>
+    <div class="roadmap-grid">
+      <article class="roadmap-card">
+        <h3>Adoption & docs</h3>
+        <ul>
+          <li>Starter template upgrades (ops dashboard patterns on demand).</li>
+          <li>Troubleshooting appendix (tracing filters, terminals, styles).</li>
+          <li>Docs.rs + crates.io badges everywhere.</li>
+        </ul>
+      </article>
+      <article class="roadmap-card">
+        <h3>Runtime ergonomics</h3>
+        <ul>
+          <li>Deterministic render snapshots for golden tests.</li>
+          <li>Task guardrails & panic surfacing in injected drivers.</li>
+          <li>Headless tooling for CI previews.</li>
+        </ul>
+      </article>
+      <article class="roadmap-card">
+        <h3>Tooling & diagnostics</h3>
+        <ul>
+          <li>In-app diagnostics HUD showing render/event stats.</li>
+          <li>Performance metrics emitted via tracing layers.</li>
+          <li>CLI helpers for style watching + template generation.</li>
+        </ul>
+      </article>
+      <article class="roadmap-card">
+        <h3>Packaging & releases</h3>
+        <ul>
+          <li>Automated crates.io publish on <code>v*</code> tags (already live).</li>
+          <li>Prebuilt demo binaries / <code>rustact</code> CLI exploration.</li>
+          <li>Versioning guidance for runtime vs. widget changes.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section id="community">
+    <p class="eyebrow">Community</p>
+    <h2>Join the effort</h2>
+    <div class="card-grid">
+      <article class="card">
+        <h3>Contribute</h3>
+        <p>We welcome issues and PRs! Start with the <a href="https://github.com/IllusiveBagel/rustact/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer">contributing guide</a> and follow the <a href="https://github.com/IllusiveBagel/rustact/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noreferrer">code of conduct</a>.</p>
+        <ul>
+          <li>Run fmt, clippy (<code>-D warnings</code>), tests, docs.</li>
+          <li>Update CHANGELOG + docs when behavior shifts.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Automation</h3>
+        <p><code>ci.yml</code> enforces fmt/clippy/tests/docs on PRs, while the release workflow packages the crate, uploads artifacts, and can publish to crates.io when a token is configured.</p>
+        <ul>
+          <li>Tag releases with <code>v*</code> to trigger automation.</li>
+          <li>Docs + marketing site deploy via GitHub Pages.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Stay up to date</h3>
+        <p>Track progress on the roadmap, follow releases on GitHub, or watch the crate on crates.io to get notified about new versions.</p>
+        <ul>
+          <li><a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">Crate page</a></li>
+          <li><a href="https://github.com/IllusiveBagel/rustact/releases" target="_blank" rel="noreferrer">Release notes</a></li>
+          <li><a href="https://github.com/IllusiveBagel/rustact/blob/main/MAINTAINERS.md" target="_blank" rel="noreferrer">Maintainers</a></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Built with ❤️ in Rust. View the source on <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">GitHub</a>, install from <a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">crates.io</a>, and browse API docs under <a href="/api/rustact/index.html">/api</a>.
+    </p>
+  </footer>
+{% endblock content %}

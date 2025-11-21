@@ -19,16 +19,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: zola@0.19.2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - name: Build docs
-        run: cargo doc --no-deps
-      - name: Assemble site artifact
+      - name: Build marketing site
         run: |
-          mkdir -p site-dist
-          cp -R website/* site-dist/
+          rm -rf site-dist
+          zola build --root website --output-dir site-dist
+      - name: Build API docs
+        run: cargo doc --no-deps
+      - name: Bundle API docs
+        run: |
           mkdir -p site-dist/api
           cp -R target/doc/* site-dist/api/
       - name: Upload artifact
