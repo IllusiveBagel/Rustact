@@ -56,9 +56,7 @@ pub fn render_text_input(frame: &mut Frame<'_>, area: Rect, input: &TextInputVie
     } else {
         None
     };
-    let border_color = status_color
-        .or(focus_override)
-        .unwrap_or(default_border);
+    let border_color = status_color.or(focus_override).unwrap_or(default_border);
     let mut border_style = Style::default().fg(border_color);
     if input.focused {
         border_style = border_style.add_modifier(Modifier::BOLD);
