@@ -36,7 +36,8 @@ fn assert_row(row: &TreeRowView, label: &str, depth: usize, has_children: bool, 
 async fn app_run_uses_custom_runtime_driver() {
     let driver = TestRuntimeDriver::default();
     let app = App::new("DriverTest", component("Unit", |_ctx| Element::Empty))
-        .with_driver(driver.clone());
+        .with_driver(driver.clone())
+        .headless();
 
     timeout(Duration::from_millis(200), app.run())
         .await

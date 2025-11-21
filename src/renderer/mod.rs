@@ -7,7 +7,7 @@ use crossterm::execute;
 use crossterm::terminal::{
     EnterAlternateScreen, LeaveAlternateScreen, SetTitle, disable_raw_mode, enable_raw_mode,
 };
-use ratatui::backend::CrosstermBackend;
+use ratatui::backend::{CrosstermBackend, TestBackend};
 use ratatui::layout::Rect;
 use ratatui::{Frame, Terminal};
 
@@ -24,7 +24,12 @@ use widgets::{
 };
 
 pub struct Renderer {
-    terminal: Terminal<CrosstermBackend<Stdout>>,
+    terminal: RendererKind,
+}
+
+enum RendererKind {
+    Crossterm(Terminal<CrosstermBackend<Stdout>>),
+    Headless(Terminal<TestBackend>),
 }
 
 impl Renderer {
@@ -41,31 +46,53 @@ impl Renderer {
         .context("prepare terminal")?;
         let backend = CrosstermBackend::new(stdout);
         let terminal = Terminal::new(backend).context("build terminal")?;
-        Ok(Self { terminal })
+        Ok(Self {
+            terminal: RendererKind::Crossterm(terminal),
+        })
+    }
+
+    pub fn headless() -> anyhow::Result<Self> {
+        let backend = TestBackend::new(80, 24);
+        let terminal = Terminal::new(backend).context("build headless terminal")?;
+        Ok(Self {
+            terminal: RendererKind::Headless(terminal),
+        })
     }
 
     pub fn draw(&mut self, view: &View) -> anyhow::Result<()> {
         reset_button_hitboxes();
         TextInputs::reset_hitboxes();
-        self.terminal.draw(|frame| {
-            let area = frame.size();
-            render_view(frame, area, view);
-        })?;
+        match &mut self.terminal {
+            RendererKind::Crossterm(terminal) => {
+                terminal.draw(|frame| {
+                    let area = frame.size();
+                    render_view(frame, area, view);
+                })?;
+            }
+            RendererKind::Headless(terminal) => {
+                terminal.draw(|frame| {
+                    let area = frame.size();
+                    render_view(frame, area, view);
+                })?;
+            }
+        }
         Ok(())
     }
 }
 
 impl Drop for Renderer {
     fn drop(&mut self) {
-        let _ = disable_raw_mode();
-        let mut stdout = stdout();
-        let _ = execute!(
-            stdout,
-            Show,
-            DisableMouseCapture,
-            LeaveAlternateScreen,
-            SetTitle("Terminal")
-        );
+        if matches!(self.terminal, RendererKind::Crossterm(_)) {
+            let _ = disable_raw_mode();
+            let mut stdout = stdout();
+            let _ = execute!(
+                stdout,
+                Show,
+                DisableMouseCapture,
+                LeaveAlternateScreen,
+                SetTitle("Terminal")
+            );
+        }
     }
 }
 

@@ -30,6 +30,12 @@ use super::view::{
     TextView, ToastStackView, ToastView, TreeRowView, TreeView, View,
 };
 
+#[derive(Clone, Copy)]
+enum RendererMode {
+    Interactive,
+    Headless,
+}
+
 #[derive(Clone)]
 pub struct App {
     name: &'static str,
@@ -40,6 +46,7 @@ pub struct App {
     styles: Arc<Stylesheet>,
     driver: Arc<dyn RuntimeDriver>,
     stylesheet_watch: Option<PathBuf>,
+    renderer_mode: RendererMode,
 }
 
 #[derive(Clone, Copy)]
@@ -66,6 +73,7 @@ impl App {
             styles: Arc::new(Stylesheet::default()),
             driver: Arc::new(DefaultRuntimeDriver),
             stylesheet_watch: None,
+            renderer_mode: RendererMode::Interactive,
         }
     }
 
@@ -104,11 +112,19 @@ impl App {
         self
     }
 
+    pub fn headless(mut self) -> Self {
+        self.renderer_mode = RendererMode::Headless;
+        self
+    }
+
     pub async fn run(mut self) -> anyhow::Result<()> {
         info!(app = self.name, "starting runtime");
         let (tx, mut rx) = mpsc::channel(128);
         let dispatcher = Dispatcher::new(tx.clone(), self.event_bus.clone());
-        let mut renderer = Renderer::new(self.name).context("initialize renderer")?;
+        let mut renderer = match self.renderer_mode {
+            RendererMode::Interactive => Renderer::new(self.name).context("initialize renderer")?,
+            RendererMode::Headless => Renderer::headless().context("initialize renderer")?,
+        };
         let mut last_view: Option<View> = None;
 
         let event_task = self.driver.spawn_terminal_events(tx.clone());
