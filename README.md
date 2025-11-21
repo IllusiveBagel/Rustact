@@ -243,4 +243,3 @@ Every render builds a `View` tree, compares it with the previous frame, and only
 ## License
 
 Rustact is distributed under the [MIT License](LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.
-```}
