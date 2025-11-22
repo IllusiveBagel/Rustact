@@ -76,6 +76,7 @@ nav .links a:hover {
     gap: 32px;
     padding: 64px 0 48px;
     align-items: center;
+    margin-top: 10px;
 }
 
 .logo-banner {
