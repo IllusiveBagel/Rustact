@@ -3,7 +3,9 @@
 {% block content %}
   <header class="docs-header">
     <nav>
-      <a class="brand" href="{{ get_url(path="/") }}">Rustact</a>
+      <a class="brand" href="{{ get_url(path="/") }}" aria-label="Rustact">
+        <img src="{{ get_url(path="rustact-logo.svg") }}" alt="Rustact" width="180" height="30" loading="lazy" />
+      </a>
       <div class="links">
         <a href="{{ get_url(path="/") }}#install">Install</a>
         <a href="{{ get_url(path="/") }}#features">Features</a>
