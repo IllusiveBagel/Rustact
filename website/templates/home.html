@@ -5,34 +5,35 @@
     <nav>
       <a class="brand" href="{{ get_url(path="/") }}">Rustact</a>
       <div class="links">
-        <a href="#get-started">Get started</a>
+        <a href="#install">Install</a>
         <a href="#features">Features</a>
-        <a href="#showcase">Showcase</a>
+        <a href="#examples">Examples</a>
         <a href="#docs">Docs</a>
+        <a href="#community">Community</a>
+        <a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">Crate</a>
         <a href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="{{ config.extra.docs_url }}">API docs</a>
       </div>
     </nav>
     <section class="hero" id="top">
       <div>
-        <span class="tagline">Async terminal UI toolkit</span>
-        <h1>Ship polished TUIs without rebuilding primitives.</h1>
+        <span class="tagline">Add to any async Rust app</span>
+        <h1>Drop Rustact into your project and get a full TUI stack.</h1>
         <p>
-          Rustact blends a React-style component model, Tokio runtime, and Ratatui renderer so you can focus on product logic—state,
-          effects, context, styling, and input handling are already wired up.
+          Install the crate, render components with familiar hooks, and let the runtime handle events, effects, styling, and
+          rendering. No need to clone the repo unless you want the samples.
         </p>
         <div class="hero-cta">
-          <a class="button-primary" href="{{ get_url(path="/docs") }}">Read the docs</a>
-          <a class="button-ghost" href="{{ config.extra.repo_url }}" target="_blank" rel="noreferrer">View on GitHub →</a>
+          <a class="button-primary" href="{{ get_url(path="/docs/tutorial") }}">Build your first app</a>
+          <a class="button-ghost" href="{{ config.extra.docs_url }}">Explore API docs →</a>
         </div>
         <div class="stat-grid">
           <div class="stat">
-            <span>Crate</span>
-            <a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">crates.io/rustact</a>
+            <span>Install</span>
+            <code>cargo add rustact</code>
           </div>
           <div class="stat">
             <span>Docs</span>
-            <a href="{{ config.extra.docs_url }}" target="_blank" rel="noreferrer">Rustdoc & guides</a>
+            <a href="{{ get_url(path="/docs") }}">Guides & tutorial</a>
           </div>
           <div class="stat">
             <span>Source</span>
@@ -41,36 +42,50 @@
         </div>
       </div>
       <div class="card">
-        <h3>Quick start</h3>
-        <p>Run the demo with style hot reload enabled.</p>
-        <pre><code>git clone https://github.com/IllusiveBagel/rustact
-cd rustact/examples/rustact-demo
-RUSTACT_WATCH_STYLES=1 cargo run</code></pre>
-        <p>Create a fresh project with the bundled template:</p>
+        <h3>Plug-and-play snippet</h3>
+        <p>Add a component and run the runtime in your app.</p>
+        <pre><code>use rustact::{component, App, Element, Scope};
+
+fn dashboard(ctx: &mut Scope) -> Element {
+  let (count, _set_count) = ctx.use_state(|| 0);
+  Element::vstack(vec![
+    Element::text(format!("Count: {count}")),
+    Element::text("Press +/- to update"),
+  ])
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+  App::new("dashboard", component("Dashboard", dashboard)).run().await
+}</code></pre>
+      </div>
+    </section>
+  </header>
+
+  <section id="install">
+    <p class="eyebrow">Use Rustact in your project</p>
+    <h2>Install, wire, iterate.</h2>
+    <div class="card-grid">
+      <article class="card">
+        <h3>1 · Add the crate</h3>
+        <p>Stay in your own repo—just add the dependency.</p>
+        <pre><code>cargo add rustact</code></pre>
+        <p>Need Tokio, tracing, or Ratatui? The docs highlight matching versions.</p>
+      </article>
+      <article class="card">
+        <h3>2 · Render your UI</h3>
+        <p>Wrap a function with <code>component("Name", render)</code>, compose elements, and call <code>App::new(...).run()</code>.</p>
+        <p>Follow the <a href="{{ get_url(path="/docs/tutorial") }}">tutorial</a> or skim the <a href="{{ get_url(path="/docs/architecture") }}">architecture guide</a> to understand the runtime.</p>
+      </article>
+      <article class="card">
+        <h3>3 · Optional scaffolding</h3>
+        <p>Prefer a starter repo? Generate one in place:</p>
         <pre><code>cargo install cargo-generate
 cargo generate \
   --git https://github.com/IllusiveBagel/rustact \
   --branch main \
   --path templates/rustact-app</code></pre>
-      </div>
-    </section>
-  </header>
-
-  <section id="get-started">
-    <p class="eyebrow">Three quick steps</p>
-    <h2>Get productive in minutes.</h2>
-    <div class="card-grid">
-      <article class="card">
-        <h3>1. Explore</h3>
-        <p>Clone the repo, run <code>examples/rustact-demo</code>, and flip on <code>RUSTACT_WATCH_STYLES</code> to see hooks, widgets, and CSS tokens in action.</p>
-      </article>
-      <article class="card">
-        <h3>2. Scaffold</h3>
-        <p>Use <code>cargo generate</code> with <code>templates/rustact-app</code>. It mirrors the demo structure, wiring components, dispatcher events, and stylesheets for you.</p>
-      </article>
-      <article class="card">
-        <h3>3. Learn</h3>
-        <p>Follow the guide, tutorial, and styling reference (all under <code>website/content/docs</code>) to plug in your own business logic.</p>
+        <p>Examples are available too, but they’re not required.</p>
       </article>
     </div>
   </section>
@@ -109,14 +124,14 @@ cargo generate \
     </div>
   </section>
 
-  <section id="showcase">
+  <section id="examples">
     <p class="eyebrow">Examples</p>
-    <h2>See real flows before you build.</h2>
+    <h2>Optional sandboxes when you need inspiration.</h2>
     <div class="showcase">
       <article class="showcase-card">
         <h3>Demo playground</h3>
-        <p>Kitchen-sink app that exercises every hook and widget: counters, stats, tables, trees, forms, tips, and live validation.</p>
-        <p><strong>Run:</strong> <code>cd examples/rustact-demo && cargo run</code></p>
+        <p>Kitchen-sink app that exercises hooks, widgets, and CSS tokens: counters, stats, tables, trees, forms, and live validation.</p>
+        <p><strong>Run:</strong> <code>cd examples/rustact-demo && RUSTACT_WATCH_STYLES=1 cargo run</code></p>
       </article>
       <article class="showcase-card">
         <h3>Ops dashboard</h3>
@@ -127,27 +142,48 @@ cargo generate \
   </section>
 
   <section id="docs">
-    <p class="eyebrow">Docs & community</p>
-    <h2>Deep dives live in the documentation.</h2>
+    <p class="eyebrow">Docs & resources</p>
+    <h2>Everything else lives two clicks away.</h2>
     <div class="card-grid">
       <article class="card">
-        <h3>Guides</h3>
-        <p>Start with the <a href="{{ get_url(path="/docs/guide") }}">developer guide</a>, then follow the <a href="{{ get_url(path="/docs/tutorial") }}">tutorial</a> for a full walkthrough.</p>
+        <h3>Tutorial</h3>
+        <p>Hands-on walk-through that takes you from <code>cargo new</code> to a live dashboard.</p>
+        <a class="button-ghost" href="{{ get_url(path="/docs/tutorial") }}">Open tutorial →</a>
       </article>
       <article class="card">
-        <h3>Reference</h3>
-        <p>Browse <a href="{{ get_url(path="/docs/architecture") }}">architecture</a>, <a href="{{ get_url(path="/docs/styling") }}">styling</a>, and <a href="{{ config.extra.docs_url }}">rustdoc</a> for API-level details.</p>
+        <h3>Architecture & styling</h3>
+        <p>Deep dives into the runtime, hooks, renderer, and CSS-inspired styling system.</p>
+        <div class="link-row">
+          <a href="{{ get_url(path="/docs/architecture") }}">Architecture</a>
+          <a href="{{ get_url(path="/docs/styling") }}">Styling</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>API reference</h3>
+        <p>Browse all exported types via rustdoc—no cloning needed.</p>
+        <a class="button-primary" href="{{ config.extra.docs_url }}">Open rustdoc</a>
       </article>
       <article class="card">
         <h3>Roadmap & releases</h3>
-        <p>Track upcoming work in <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/roadmap.md" target="_blank" rel="noreferrer">docs/roadmap.md</a> and read <a href="https://github.com/IllusiveBagel/rustact/releases" target="_blank" rel="noreferrer">release notes</a>.</p>
-      </article>
-      <article class="card">
-        <h3>Contribute</h3>
-        <p>Review the <a href="https://github.com/IllusiveBagel/rustact/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer">contributing guide</a>, <a href="https://github.com/IllusiveBagel/rustact/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noreferrer">code of conduct</a>, and <a href="https://github.com/IllusiveBagel/rustact/blob/main/RELEASE.md" target="_blank" rel="noreferrer">release checklist</a>.</p>
+        <p>Track priorities in <a href="https://github.com/IllusiveBagel/rustact/blob/main/docs/roadmap.md" target="_blank" rel="noreferrer">docs/roadmap.md</a> and follow <a href="https://github.com/IllusiveBagel/rustact/releases" target="_blank" rel="noreferrer">GitHub releases</a>.</p>
       </article>
     </div>
-    <p class="section-lede" style="margin-top: 2rem">Everything else—troubleshooting, automation details, maintainers—stays in the docs so the home page can focus on getting you building.</p>
+  </section>
+
+  <section id="community">
+    <p class="eyebrow">Community</p>
+    <h2>Collaborate, file issues, and share feedback.</h2>
+    <div class="card-grid">
+      <article class="card">
+        <h3>Contribute</h3>
+        <p>Read the <a href="https://github.com/IllusiveBagel/rustact/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer">contributing guide</a>, honor the <a href="https://github.com/IllusiveBagel/rustact/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noreferrer">code of conduct</a>, and peek at <a href="https://github.com/IllusiveBagel/rustact/blob/main/MAINTAINERS.md" target="_blank" rel="noreferrer">maintainers</a>.</p>
+        <p>CI already enforces fmt, clippy (<code>-D warnings</code>), tests, and docs so PRs stay healthy.</p>
+      </article>
+      <article class="card">
+        <h3>Stay informed</h3>
+        <p>Watch the crate on <a href="{{ config.extra.crate_url }}" target="_blank" rel="noreferrer">crates.io</a>, subscribe to <a href="https://github.com/IllusiveBagel/rustact/releases" target="_blank" rel="noreferrer">release notes</a>, or open a discussion in GitHub issues.</p>
+      </article>
+    </div>
   </section>
 
   <footer>
