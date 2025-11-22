@@ -22,7 +22,7 @@
         <h1>Drop Rustact into your project and get a full TUI stack.</h1>
         <p>
           Install the crate, render components with familiar hooks, and let the runtime handle events, effects, styling, and
-          rendering. No need to clone the repo unless you want the samples.
+          rendering.
         </p>
         <div class="hero-cta">
           <a class="button-primary" href="{{ get_url(path="/docs/tutorial") }}">Build your first app</a>
@@ -46,6 +46,7 @@
       <div class="card">
         <h3>Plug-and-play snippet</h3>
         <p>Add a component and run the runtime in your app.</p>
+        <pre><code>cargo add rustact</code></pre>
         <pre><code>use rustact::{component, App, Element, Scope};
 
 fn dashboard(ctx: &mut Scope) -> Element {
