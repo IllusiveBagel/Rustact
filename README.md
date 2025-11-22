@@ -4,7 +4,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/IllusiveBagel/rustact?include_prereleases&label=release)](https://github.com/IllusiveBagel/rustact/releases)
 [![Crates.io](https://img.shields.io/crates/v/rustact.svg)](https://crates.io/crates/rustact)
 
-Rustact is an experimental, React-inspired framework for building async terminal UIs in Rust. It layers a component/hook system on top of `ratatui`, offering familiar primitives such as components, state, effects, context, and an event bus.
+Rustact is a React-inspired, async terminal UI framework built on top of `ratatui`, `crossterm`, and `tokio`. Components render into a virtual tree, hooks manage state, side effects, and context, and the runtime diff-patches frames to keep redraws quick even when ticks fire continuously.
 
 Install from crates.io:
 
@@ -12,102 +12,54 @@ Install from crates.io:
 cargo add rustact
 ```
 
-## Community & contributions
+## Quick start
 
-- Read the [Contributing guide](CONTRIBUTING.md) for setup, workflows, and coding standards.
-- Review the [Code of Conduct](CODE_OF_CONDUCT.md); we follow the Contributor Covenant.
-- Maintainer contacts and responsibilities live in [MAINTAINERS.md](MAINTAINERS.md).
-- Release duties and checklists are captured in [RELEASE.md](RELEASE.md).
-- New issues/PRs should use the provided GitHub templates for consistent triage.
-
-## Features
-
-- **Component tree & hooks** – Define components via `component("Name", |ctx| ...)` and manage state with `use_state`, `use_reducer`, `use_ref`, `use_effect`, `use_memo`, `use_callback`, and `provide_context` / `use_context`.
-- **Async runtime** – Built on `tokio`, handling terminal IO, ticks, and effect scheduling without blocking the UI thread.
-- **Injectable runtime drivers** – Swap the event/tick/shutdown drivers with `App::with_driver(...)` for deterministic tests or custom IO sources.
-- **Structured tracing** – The runtime emits `tracing` spans/logs around renders, events, and shutdown, so you can inspect behavior with any `tracing` subscriber.
-- **Event bus** – Subscribe to keyboard/mouse/resize/tick events via `ctx.dispatcher().events().subscribe()` and react within hooks or spawned tasks.
-- **Ratatui renderer** – Converts the virtual tree into `ratatui` widgets, handling layout primitives like blocks, vertical/horizontal stacks, styled text, list panels, gauges, tables, tree views, forms, and rich text inputs.
-- **View diffing** – The runtime caches the previous view tree and skips terminal draws when nothing has changed, keeping renders snappy even with frequent ticks.
-- **Mouse interactions** – Define button or input nodes with stable IDs; the renderer automatically maps mouse hitboxes so event handlers can react to clicks and focus changes.
-- **Text inputs & validation hooks** – `use_text_input` binds component state to editable fields (with cursor management, tab focus, and secure mode), while `use_text_input_validation` or `handle.set_status(...)` drive contextual border colors and helper text.
-- **Tabs, overlays, and toasts** – Compose `TabsNode`, `ModalNode`, `LayeredNode`, and `ToastStackNode` to build multi-pane dashboards with modal dialogs and notification stacks without wiring bespoke renderer code.
-- **CSS-inspired styling** – Drop tweaks into `styles/demo.css` inside each example crate (e.g. `examples/rustact-demo/styles/demo.css`) to recolor widgets, toggle button fills, rename gauge labels, change list highlight colors, resize form/table columns, or theme inputs without touching Rust code.
-- **Optional style hot reload** – Set `RUSTACT_WATCH_STYLES=1` (or `true`/`on`) to have the runtime poll the sibling `styles/demo.css` file and live-reload the stylesheet without restarting the app.
-- **Demo app** – `examples/rustact-demo/src/main.rs` now composes every hook (state, reducer, ref, memo, callback, effect, context) with all widgets (text, flex, gauge, buttons, lists, tables, trees, forms) so you can see each feature in one place.
-
-## Documentation
-
-- `docs/guide.md` – day-to-day developer guide (setup, workflows, hook primer).
-- `docs/tutorial.md` – step-by-step tutorial for building a fresh Rustact app.
-- `docs/architecture.md` – deep dive into the runtime, hooks, renderer, and events.
-- `docs/styling.md` – CSS subset reference and theming tips.
-- `docs/roadmap.md` – prioritized initiatives to steer ongoing work.
-- `docs/api-docs.md` – publishing instructions for hosting `cargo doc` output.
-- `docs/template.md` – outline for the upcoming `cargo generate` starter template.
-- `templates/rustact-app/` – ready-to-use project scaffold consumable via `cargo generate`.
-- `examples/README.md` – overview of the standalone demo crates plus run instructions.
-
-## Starter template
-
-Spin up a fresh app via [`cargo-generate`](https://github.com/cargo-generate/cargo-generate):
-
-```bash
-cargo install cargo-generate
-cargo generate \
-    --git https://github.com/IllusiveBagel/rustact \
-    --branch main \
-    --path templates/rustact-app \
-    --name my-rustact-app
-cd my-rustact-app
-cargo run
-```
-
-The template mirrors the demo’s patterns (hooks, dispatcher events, text inputs) plus a default stylesheet and README.
-
-## API docs hosting
-
-The workflow `.github/workflows/publish-docs.yml` builds `cargo doc --no-deps` on every push to `main` and deploys the result via GitHub Pages. Enable Pages → "GitHub Actions" in repo settings to activate it. Manual steps and customization tips live in `docs/api-docs.md`.
-
-## Tracing logs
-
-Rustact emits `tracing` spans throughout the runtime. Enable them in your binary (or the demo) by adding a subscriber:
+### Build a minimal app
 
 ```rust
-use tracing_subscriber::EnvFilter;
+use rustact::{component, App, Element, Scope};
+use rustact::{is_button_click, ButtonNode};
 
-fn init_tracing() {
-    let _ = tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::new("rustact=info"))
-        .try_init();
+fn counter(ctx: &mut Scope) -> Element {
+    let (count, set_count) = ctx.use_state(|| 0i32);
+
+    ctx.use_effect((), move |dispatcher| {
+        let mut events = dispatcher.events().subscribe();
+        let handle = tokio::spawn(async move {
+            while let Ok(event) = events.recv().await {
+                if is_button_click(&event, "counter:inc") {
+                    set_count.update(|value| *value += 1);
+                }
+            }
+        });
+        Some(Box::new(move || handle.abort()))
+    });
+
+    Element::vstack(vec![
+        Element::text(format!("Count: {count}")),
+        Element::button(ButtonNode::new("counter:inc", "+").filled(true)),
+    ])
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let root = component("Counter", counter);
+    App::new("counter-demo", root)
+        .watch_stylesheet("styles/app.css")
+        .run()
+        .await
 }
 ```
 
-Then set `RUST_LOG=info` (or more specific filters) before running the app to see render requests, external events, and shutdown diagnostics.
-
-## Running the demo
+### Run the kitchen-sink demo
 
 ```bash
 cd examples/rustact-demo
-cargo run
-```
-
-While running:
-- Press `+`, `-`, or `r`, or click the on-screen `-` / `+` buttons to interact with the counter (watch the progress gauge update as the count approaches ±10).
-- Observe the stats panel and event log streaming the five most recent framework events.
-- Tab between the name/email/token inputs, click to focus, and type to see live validation statuses plus CSS-driven border and background colors.
-- Check the framework overview banner and tips column to see keyed components, fragments, and shared context in action.
-- Exit with `Ctrl+C`.
-
-See `examples/README.md` for more about the demo layout and publishing guidance.
-
-### Watching styles without restarting
-
-```bash
 RUSTACT_WATCH_STYLES=1 cargo run
 ```
 
-Run the command from inside the example you want to tweak. When the env var is set (accepts `1`, `true`, or `on`) and a `styles/demo.css` file exists next to the binary, Rustact will poll the file, re-parse it on change, and trigger a render so you can see your CSS edits immediately. The demo and ops dashboard both honor the flag; when the file is missing, the runtime logs a warning and keeps using the embedded stylesheet.
+-   Counter, gauges, tables, trees, forms, toasts, and tips live in one app under `examples/rustact-demo/src/main.rs`.
+-   Set `RUSTACT_WATCH_STYLES` to `1`, `true`, or `on` to hot-reload `styles/demo.css` while the example is running.
 
 ### Ops dashboard showcase
 
@@ -116,141 +68,84 @@ cd examples/ops-dashboard
 cargo run
 ```
 
-While running:
-- Press `1`/`2` to switch between the overview and streaming logs tabs.
-- Press `i` to pop open the incident modal, `Esc` to close it.
-- Let the app run to watch deployment toasts bubble up; press `c` to dismiss the oldest toast.
-- All overlays are composed via the new `LayeredNode`, `ModalNode`, and `ToastStackNode`, so they are reusable in your own apps.
+Explore layered overlays (`LayeredNode`), toasts (`ToastStackNode`), tabs, and modal dialogs, all powered by hooks and shared context.
 
-### Styling via CSS
+### Scaffold a new project
 
-Rustact loads a sibling `styles/demo.css` (for example `examples/rustact-demo/styles/demo.css`) on startup. The CSS parser understands simple selectors (`element`, `element#id`, `element.class`) plus custom properties, so you can retheme the terminal UI without recompiling:
+```bash
+cargo install cargo-generate
+cargo generate \
+  --git https://github.com/IllusiveBagel/rustact \
+  --branch main \
+  --path templates/rustact-app \
+  --name my-rustact-app
+cd my-rustact-app
+cargo run
+```
 
-- `:root` defines palette tokens such as `--accent-color`, `--warning-color`, and friends that the demo injects into its `Theme` context.
-- `button#counter-plus` (and `#counter-minus`) set `accent-color` and `--filled` to control button appearance.
-- `gauge#counter-progress` can override the bar color and `--label` text.
-- `list#stats` exposes `--highlight-color` and `--max-items`, while `table#services` reads `--column-widths` and `form#release` reads `--label-width`.
-- `input`, `input#feedback-name`, etc. configure accent/border/text/background colors, while `tip.keyboard` / `.mouse` / `.context` use the standard `color` property to tint each info card.
+The template mirrors the demo’s structure (components, dispatcher usage, stylesheet, README) so you can immediately iterate on your own TUI.
 
-Save the file and rerun `cargo run` inside that example to see your tweaks reflected immediately.
-See `docs/styling.md` for a deeper dive into selectors, property types, and integration tips.
+## Why Rustact?
 
-## Creating components
+-   **Component + hook model** – Declare components with `component("Name", handler)` and manage state via `use_state`, `use_reducer`, `use_ref`, `use_memo`, `use_callback`, `use_effect`, `provide_context`, `use_context`, and the dedicated `use_text_input` / `use_text_input_validation` hooks.
+-   **Async runtime + event bus** – `tokio` drives terminal IO, ticks, shutdown, and external signals; subscribe to `FrameworkEvent`s through `Dispatcher::events()` for keyboard, mouse, resize, and timer events.
+-   **Injectable drivers & headless mode** – Use `App::with_driver` to plug deterministic drivers for tests or simulations, or call `App::headless()` to render without a terminal for snapshots.
+-   **Rich widget set** – `Element` builders cover flex layouts, blocks, lists, tables, trees, forms, gauges, buttons, inputs, tabs, layered overlays, modals, and toast stacks.
+-   **Text input system** – Handles focus rings, cursor placement, secure mode, validation state, and shared registries so inputs behave like native controls (including mouse hits and Tab cycling).
+-   **CSS-inspired styling** – The `Stylesheet` parser understands `:root`, element/id/class selectors, and custom properties so you can recolor UI, resize columns, rename labels, or toggle fills without recompiling.
+-   **Hot-reloadable themes** – `App::watch_stylesheet` plus the `RUSTACT_WATCH_STYLES` env var reload styles whenever `styles/demo.css` (or any configured path) changes.
+-   **View diffing + tracing** – Frames are diffed before drawing, and every render/event/shutdown emits `tracing` spans so you can profile and debug behavior.
 
-```rust
-use rustact::{component, Element, Scope};
-use rustact::runtime::Color;
+## Styling workflow
 
-fn greeting(ctx: &mut Scope) -> Element {
-    let color = ctx
-        .use_context::<Theme>()
-        .map(|theme| theme.accent)
-        .unwrap_or(Color::Green);
+Rustact looks for a sibling stylesheet (for the demos that is `styles/demo.css`). You can define palette tokens in `:root`, override widget-specific properties, and reload on every save.
 
-    Element::colored_text("Hello from a component", color)
+```css
+:root {
+    --accent-color: #5af78e;
+    --warning-color: #ffb86c;
 }
 
-let app = App::new("Demo", component("Greeting", greeting));
-```
+button#counter-plus {
+    accent-color: var(--accent-color);
+    --filled: true;
+}
 
-Each render receives a `Scope`, giving access to hooks, the dispatcher, and context. Components can compose other components with `.into()`:
-
-```rust
-Element::vstack(vec![
-    component("Greeting", greeting).into(),
-    Element::text("Static text"),
-])
-```
-
-### Advanced widgets
-
-Tables, trees, and forms ship with builder-style APIs so you can fluently describe structured layouts:
-
-```rust
-use rustact::{Element, TableCellNode, TableNode, TableRowNode};
-use rustact::runtime::Color;
-
-let table = TableNode::new(vec![
-    TableRowNode::new(vec![
-        TableCellNode::new("api").bold(),
-        TableCellNode::new("Healthy").color(Color::Green),
-    ]),
-])
-.header(TableRowNode::new(vec![
-    TableCellNode::new("Service").bold(),
-    TableCellNode::new("Status").bold(),
-]))
-.widths(vec![40, 60])
-.highlight(0);
-
-Element::table(table);
-```
-
-`TreeNode`/`TreeItemNode` let you model recursive hierarchies, while `FormNode` + `FormFieldNode` render labeled key/value pairs with validation state highlighting.
-
-### Text inputs & validation
-
-```rust
-use rustact::{Element, Scope, TextInputNode};
-use rustact::runtime::FormFieldStatus;
-
-fn feedback(ctx: &mut Scope) -> Element {
-    let name = ctx.use_text_input("feedback:name", || String::new());
-    let name_status = ctx.use_text_input_validation(&name, |snapshot| {
-        if snapshot.value.trim().is_empty() {
-            FormFieldStatus::Warning
-        } else {
-            FormFieldStatus::Success
-        }
-    });
-
-    Element::text_input(
-        TextInputNode::new(name)
-            .label("Display name")
-            .placeholder("Rustacean in Residence")
-            .width(32)
-            .status(name_status),
-    )
+input.feedback-name {
+    border-color: #8be9fd;
+    placeholder: "Display name";
 }
 ```
 
-`use_text_input` registers a focusable binding with the shared registry. The runtime tracks hitboxes, so clicking anywhere in the input focuses it, while Tab/Shift+Tab move between inputs in declaration order. A blinking cursor shows when the field is focused, and `.secure(true)` masks sensitive values. Use `ctx.use_text_input_validation` or `handle.set_status(FormFieldStatus::Error)` to tint the field, then read helper text from the same status to explain errors or warnings.
+Run any example with `RUSTACT_WATCH_STYLES=1 cargo run` to live-reload the stylesheet. For custom apps, chain `.watch_stylesheet("styles/app.css")` on `App` and keep the env var enabled while iterating.
 
-### Reducer & ref hooks
+Read `website/content/docs/styling.md` for the full selector/property reference and integration tips.
 
-```rust
-use rustact::{Element, Scope};
+## Documentation & resources
 
-#[derive(Clone, Copy)]
-enum Action {
-    Increment,
-    Reset,
-}
+-   **Docs site** – https://illusivebagel.github.io/rustact (generated from `website/content/docs/**`).
+-   **website/content/docs/guide.md** – high-level overview, concepts, and workflows.
+-   **website/content/docs/tutorial.md** – build-from-scratch walkthrough.
+-   **website/content/docs/architecture.md** – runtime, hooks, renderer, and event bus deep dive.
+-   **website/content/docs/api-docs.md** – how the GitHub Pages workflow publishes `cargo doc`.
+-   **website/content/docs/roadmap.md** – prioritized features and milestones.
+-   **website/content/docs/template.md** – expectations for template contributions.
+-   **examples/README.md** – describes each example crate and how to run it.
+-   **templates/rustact-app/** – starter project used by `cargo generate`.
 
-fn counter(ctx: &mut Scope) -> Element {
-    let (value, dispatch) = ctx.use_reducer(|| 0i32, |state, action: Action| match action {
-        Action::Increment => *state += 1,
-        Action::Reset => *state = 0,
-    });
+## Repository layout
 
-    let last_event = ctx.use_ref(|| None::<String>);
+-   `src/` – core runtime, renderer, hooks, context, styles, text input system, and integration tests.
+-   `examples/` – standalone apps (`rustact-demo`, `ops-dashboard`) that depend on the local crate via path dependencies.
+-   `templates/` – reusable scaffolds; currently `templates/rustact-app`.
+-   `website/` – documentation source consumed by GitHub Pages.
+-   `CHANGELOG.md`, `RELEASE.md`, `MAINTAINERS.md`, `CONTRIBUTING.md` – project process, release, and ownership docs.
 
-    Element::text(format!(
-        "Value: {value} (last event: {:?})",
-        last_event.with(|evt| evt.clone())
-    ))
-}
-```
+## Community & contributions
 
-`use_reducer` returns the current value plus a `dispatch` handle that batches state updates through your reducer; `use_ref` stores mutable data without triggering re-renders (handy for metrics or imperative handles).
-
-### View diffing
-
-Every render builds a `View` tree, compares it with the previous frame, and only asks the renderer to draw when something actually changed. Hooks, effects, and state updates still run, but redundant terminal flushes are avoided—mirroring the virtual DOM approach.
-
-## Next steps
-
-- Package reusable components and publish to crates.io.
+-   Follow the [Code of Conduct](CODE_OF_CONDUCT.md) (Contributor Covenant).
+-   Read [CONTRIBUTING.md](CONTRIBUTING.md) for tooling, test, and review expectations.
+-   Maintainer responsibilities live in [MAINTAINERS.md](MAINTAINERS.md); release steps in [RELEASE.md](RELEASE.md); history in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
