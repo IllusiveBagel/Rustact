@@ -12,9 +12,9 @@ This walkthrough creates a fresh Rustact-powered terminal dashboard from scratch
 
 ## 0. Prerequisites
 
-- Rust stable toolchain (`rustup show`)
-- `cargo` for building/running
-- A terminal with mouse support (optional but recommended)
+-   Rust stable toolchain (`rustup show`)
+-   `cargo` for building/running
+-   A terminal with mouse support (optional but recommended)
 
 ## 1. Scaffold a new binary crate
 
@@ -27,12 +27,12 @@ Add dependencies to `Cargo.toml`:
 
 ```toml
 [dependencies]
-rustact = { path = "../rustact" } # use the local checkout while developing
+rustact = "0.1"
 anyhow = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 ```
 
-> Replace the `path` dependency with `rustact = "0.x"` once the crate is published.
+> Working from a local clone of the Rustact repo? Temporarily swap in `rustact = { path = "../rustact" }` so your sample app uses the checked-out sources.
 
 ## 2. Boot the runtime
 
@@ -107,14 +107,13 @@ Hook the callbacks up via an effect that watches the event bus (or handle key pr
 Use the dispatcher’s event bus plus the `is_button_click` helper:
 
 ```rust
-use rustact::{Dispatcher, FrameworkEvent};
-use rustact::interactions::is_button_click;
+use rustact::{Dispatcher, FrameworkEvent, is_button_click};
 
 ctx.use_effect((), move |dispatcher: Dispatcher| {
     let mut events = dispatcher.events().subscribe();
     let decrement = set_count.clone();
     let increment = set_count.clone();
-    tokio::spawn(async move {
+    let handle = tokio::spawn(async move {
         while let Ok(event) = events.recv().await {
             if is_button_click(&event, "counter-minus") {
                 decrement.update(|value| *value -= 1);
@@ -123,7 +122,7 @@ ctx.use_effect((), move |dispatcher: Dispatcher| {
             }
         }
     });
-    None
+    Some(Box::new(move || handle.abort()))
 });
 ```
 
@@ -159,28 +158,35 @@ Create `styles/app.css`:
 
 ```css
 :root {
-  --accent-color: #00e5ff;
+    --accent-color: #00e5ff;
 }
 
-button#counter-plus { accent-color: #5be7ff; --filled: true; }
-button#counter-minus { accent-color: #ff6b6b; }
+button#counter-plus {
+    accent-color: #5be7ff;
+    --filled: true;
+}
+button#counter-minus {
+    accent-color: #ff6b6b;
+}
 input#profile:name {
-  accent-color: #f5f5f5;
-  --border-color: #00e5ff;
-  --background-color: #001f2f;
+    accent-color: #f5f5f5;
+    --border-color: #00e5ff;
+    --background-color: #001f2f;
 }
 ```
 
-Load it in `main`:
+Load it in `main` (and optionally watch the file so edits apply live):
 
 ```rust
 use rustact::styles::Stylesheet;
 
 let stylesheet = Stylesheet::parse(include_str!("../styles/app.css"))?;
-App::new("HelloRustact", component("Root", root))
-    .with_stylesheet(stylesheet)
-    .run()
-    .await
+let mut app = App::new("HelloRustact", component("Root", root))
+    .with_stylesheet(stylesheet);
+if std::env::var("RUSTACT_WATCH_STYLES").is_ok() {
+    app = app.watch_stylesheet("styles/app.css");
+}
+app.run().await
 ```
 
 ## 7. Wire keyboard shortcuts
@@ -209,8 +215,9 @@ cargo test
 ```
 
 From here you can:
-- Add a `ListView` that logs every event.
-- Persist state to disk using `tokio::fs` inside an effect.
-- Break components into separate modules and reuse them across multiple screens.
+
+-   Add a `ListView` that logs every event.
+-   Persist state to disk using `tokio::fs` inside an effect.
+-   Break components into separate modules and reuse them across multiple screens.
 
 Congrats—you now have a custom Rustact-powered TUI! Expand it following the [roadmap](/docs/roadmap/) and reference documents like the [developer guide](/docs/guide/), [architecture walkthrough](/docs/architecture/), and [styling reference](/docs/styling/) whenever you need deeper detail.

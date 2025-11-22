@@ -14,7 +14,7 @@ A practical reference for working inside the Rustact codebase: setup, workflows,
 
 ## 1. Prerequisites
 
--   Rust toolchain 1.76+ with `cargo` and `rustfmt` (`rustup update` to grab the latest stable channel).
+-   Rust toolchain 1.85+ (matches the crate’s `rust-version`) with `cargo`, `rustfmt`, and `clippy` (`rustup update && rustup component add rustfmt clippy`).
 -   `tokio` runtime knowledge is helpful but not required; async entrypoints are already wired up.
 -   A terminal that supports ANSI escape codes (most modern terminals do) and mouse capture if you want to interact with buttons/inputs.
 
@@ -43,16 +43,16 @@ Run `cd ../ops-dashboard && cargo run` for the ops showcase. See `examples/READM
 
 ## 3. Project layout
 
-| Path                                    | Overview                                                                                           |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `src/runtime/`                          | App lifecycle, dispatcher, reconciler, element/view definitions, renderer bridge.                  |
-| `src/hooks/`                            | Hook registry, `Scope`, and all built-in hooks (`use_state`, `use_effect`, etc.).                  |
-| `src/context/`                          | Type-safe provider stack for passing data down the tree.                                           |
-| `src/events/`                           | `FrameworkEvent`, broadcast bus, helpers for Ctrl+C and mouse detection.                           |
-| `src/interactions.rs`                   | Global hitbox registry for buttons and inputs.                                                     |
-| `src/text_input/`                       | Text input bindings, state machine, and validation hooks.                                          |
-| `examples/rustact-demo/styles/demo.css` | Runtime stylesheet loaded by the main demo app.                                                    |
-| `docs/`                                 | Architecture notes, styling reference, roadmap, tutorial, and this guide (legacy Markdown copies). |
+| Path                                    | Overview                                                                                                       |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `src/runtime/`                          | App lifecycle, dispatcher, reconciler, element/view definitions, renderer bridge.                              |
+| `src/hooks/`                            | Hook registry, `Scope`, and all built-in hooks (`use_state`, `use_effect`, etc.).                              |
+| `src/context/`                          | Type-safe provider stack for passing data down the tree.                                                       |
+| `src/events/`                           | `FrameworkEvent`, broadcast bus, helpers for Ctrl+C and mouse detection.                                       |
+| `src/interactions.rs`                   | Global hitbox registry for buttons and inputs.                                                                 |
+| `src/text_input/`                       | Text input bindings, state machine, and validation hooks.                                                      |
+| `examples/rustact-demo/styles/demo.css` | Runtime stylesheet loaded by the main demo app.                                                                |
+| `website/content/docs/`                 | Source for this guide, the tutorial, styling reference, roadmap, and architecture docs that power the website. |
 
 ## 4. Everyday workflows
 
@@ -68,7 +68,7 @@ cargo fmt && cargo clippy  # format + lint changes
 cargo test                 # run the growing unit-test suite
 ```
 
-Use `RUST_LOG=debug` once tracing is added (see the [roadmap](/docs/roadmap/)) to inspect runtime events.
+Tracing spans already wrap renders, external events, and shutdown; add a `tracing_subscriber` and run with `RUST_LOG=rustact=trace` (or an `EnvFilter`) to inspect the runtime in action.
 
 ### Hot-edit cycle
 
@@ -104,7 +104,7 @@ Scope exposes additional helpers (`dispatcher`, `styles`, `use_text_input_valida
 ## 7. Styling & theming
 
 -   Stylesheets use a compact CSS subset (type/id/class selectors plus `:root`).
--   Load them from disk with `Stylesheet::from_file("styles/demo.css")` inside each example crate (the file lives next to its binary) and pass them to `App::with_stylesheet(...)`.
+-   Load them from disk with `Stylesheet::from_file("styles/demo.css")` inside each example crate (the helper `load_demo_stylesheet` does this) and fall back to `Stylesheet::parse(include_str!("../styles/demo.css"))` if the file is missing, then pass the result to `App::with_stylesheet(...)`.
 -   Toggle hot reload by setting `RUSTACT_WATCH_STYLES=1` (or `true`/`on`); the runtime will poll the sibling `styles/demo.css`, re-parse on change, and schedule a redraw without restarting the process.
 -   Query inside components with `ctx.styles().query(StyleQuery::element("button").with_id("counter-plus"))`.
 -   See the [styling reference](/docs/styling/) for supported selectors, properties, and examples.
@@ -115,8 +115,12 @@ Bootstrap a fresh app using the bundled `cargo generate` template once published
 
 ```bash
 cargo install cargo-generate
-cargo generate --git https://github.com/IllusiveBagel/rustact --name my-app --template rustact-app
-cd my-app
+cargo generate \
+    --git https://github.com/IllusiveBagel/rustact \
+    --branch main \
+    --path templates/rustact-app \
+    --name my-rustact-app
+cd my-rustact-app
 cargo run
 ```
 
@@ -138,17 +142,17 @@ The template lives under `templates/rustact-app/` and includes a sample componen
 
 Keep this guide nearby while contributing; update it whenever you add new workflows, commands, or conceptual primitives.
 
-## 11. Custom runtime drivers
+## 11. Custom runtime drivers (internal seam)
 
-The runtime accepts pluggable drivers for the terminal/tick/shutdown tasks. Implement the `RuntimeDriver` trait (from `rustact::runtime`) and pass it to `App::with_driver(...)` to swap in mocks or alternate IO sources.
+`App::with_driver` accepts any `RuntimeDriver`, and the built-in tests (`src/runtime/tests/app.rs`) already use the hook to provide a deterministic driver. Because the trait signature still refers to the internal `AppMessage` type, only code inside this crate can currently implement it; consumers should stick with `DefaultRuntimeDriver` for now. When you do need a mock driver (e.g., for tests), mirror the pattern below:
 
 ```rust
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 
-use rustact::runtime::{component, App, Element, RuntimeDriver};
-use rustact::runtime::dispatcher::AppMessage;
+use crate::runtime::{component, App, Element, RuntimeDriver};
+use crate::runtime::dispatcher::AppMessage;
 
 #[derive(Clone)]
 struct TestDriver;
@@ -174,7 +178,7 @@ let app = App::new("Testable", component("Unit", |_ctx| Element::Empty))
     .with_driver(TestDriver);
 ```
 
-This makes `App::run()` deterministic under `cargo test`, unlocks headless integration drivers, and keeps the production behavior intact via the default driver (`DefaultRuntimeDriver`).
+The seam keeps `App::run()` deterministic during tests (pair it with `.headless()` if you do not want to touch the terminal) while production builds continue to use `DefaultRuntimeDriver`.
 
 ## 12. Tracing & diagnostics
 

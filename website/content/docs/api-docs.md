@@ -23,7 +23,7 @@ Artifacts land in `target/doc/`. Add `--open` while iterating.
 Rustact ships `.github/workflows/publish-docs.yml`, which now builds **two** assets before deploying:
 
 1. Runs on every push to `main` (plus manual dispatch).
-2. Installs Zola and runs `zola build --root website --output-dir site-dist` to render the marketing site.
+2. Installs Zola and runs `(cd website && zola build --output-dir ../site-dist)` to render the marketing site into `site-dist/` at the repo root.
 3. Builds API docs with `cargo doc --no-deps` on Ubuntu.
 4. Copies `target/doc/*` into `site-dist/api/`, so `/api/rustact/` exposes rustdoc while `/` serves the marketing site.
 5. Uploads `site-dist` as the Pages artifact and deploys via `actions/deploy-pages`.
@@ -42,5 +42,5 @@ If you ever need to publish by hand:
 
 ## 4. Track updates
 
-- Whenever the public API changes, rerun the workflow to keep docs current.
-- Add README badges or links pointing to the hosted docs (`https://illusivebagel.github.io/rustact/api/rustact/`).
+-   Whenever the public API changes, rerun the workflow to keep docs current.
+-   Add README badges or links pointing to the hosted docs (`https://illusivebagel.github.io/rustact/api/rustact/`).

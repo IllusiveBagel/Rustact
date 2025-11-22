@@ -14,25 +14,24 @@ Goal: provide a `cargo generate` template (or starter repo) that bootstraps a Ru
 
 ```
 {{project-name}}/
-├─ Cargo.toml (depends on `rustact`, `tokio`, `anyhow`)
+├─ Cargo.toml (depends on `rustact`, `tokio`, `anyhow`, `ratatui`)
+├─ README.md (quick-start instructions for the generated app)
 ├─ src/
-│  ├─ main.rs (tokio entrypoint, loads stylesheet, mounts root component)
+│  ├─ main.rs (Tokio entrypoint, loads the stylesheet, mounts the root component)
 │  └─ components/
-│     └─ root.rs (example component using hooks + inputs)
-├─ styles/
-│  └─ app.css (placeholders for :root tokens, buttons, inputs)
-├─ docs/
-│  └─ README.md (quick start instructions for the generated app)
-└─ .cargo/config.toml (optional: set `rustflags` or strip settings)
+│     └─ root.rs (example component using hooks, text inputs, and widgets)
+└─ styles/
+    └─ app.css (placeholders for :root tokens, buttons, inputs, embedded via `include_str!`)
 ```
 
 ## Template contents
 
-- `template.toml` describing placeholders (`project-name`, `author_name`, `app_description`).
-- `Cargo.toml` wired to `rustact` (git dependency for now) plus `anyhow`, `tokio`, `ratatui`.
-- `src/components/root.rs` demo component showcasing hooks, text inputs, and button interactions via the dispatcher.
-- `styles/app.css` with sensible defaults for buttons/inputs.
-- `README.md` explaining how to run, test, and customize the generated app.
+-   `template.toml` describing placeholders (`project-name`, `author_name`, `app_description`).
+-   `Cargo.toml` wired to `rustact` (git dependency targeting `main` for now) plus `anyhow`, `tokio`, and `ratatui`.
+-   `src/main.rs` bootstrapping Tokio, parsing `styles/app.css` with `Stylesheet::parse(include_str!("../styles/app.css"))`, and running the root component.
+-   `src/components/root.rs` demo component showcasing hooks, text inputs, and button interactions via the dispatcher.
+-   `styles/app.css` with sensible defaults for buttons/inputs, matching the selectors documented in the styling guide.
+-   `README.md` explaining how to run, test, and customize the generated app (no separate `docs/` folder is emitted).
 
 ## Usage
 
@@ -49,4 +48,4 @@ cd my-rustact-app
 cargo run
 ```
 
-After the crate is published to crates.io you can swap the dependency in the generated `Cargo.toml` to the released version. Pair the template with the [tutorial](/docs/tutorial/) and [developer guide](/docs/guide/) to keep building.
+The generated `Cargo.toml` intentionally points at the GitHub repo so new apps track `main`. Swap it for the crates.io release (e.g., `rustact = "0.1"`) once you want a pinned dependency. Pair the template with the [tutorial](/docs/tutorial/) and [developer guide](/docs/guide/) to keep building.

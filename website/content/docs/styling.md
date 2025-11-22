@@ -8,20 +8,20 @@ updated = 2025-11-21
 
 # Styling Terminal UIs
 
-Rustact can reskin a terminal UI without recompilation by loading a lightweight CSS-inspired stylesheet at runtime. The demo app (`examples/rustact-demo/src/main.rs`) calls `Stylesheet::parse(include_str!("../styles/demo.css"))` and passes the result into `App::with_stylesheet()`. Every component receives a `Scope` that exposes the shared stylesheet, so widgets can query CSS rules as they render.
+Rustact can reskin a terminal UI without recompilation by loading a lightweight CSS-inspired stylesheet at runtime. The demo app (`examples/rustact-demo/src/main.rs`) runs `load_demo_stylesheet()`, which prefers `Stylesheet::from_file("styles/demo.css")` and falls back to `Stylesheet::parse(include_str!("../styles/demo.css"))`, then feeds the result to `App::with_stylesheet()`. Every component receives a `Scope` that exposes the shared stylesheet, so widgets can query CSS rules as they render. Set `RUSTACT_WATCH_STYLES=1` to have `App::watch_stylesheet("styles/demo.css")` reload the file automatically while the example is running.
 
 ## Selector model
 
 Only a small subset of CSS is implemented today, optimized for predictable terminal styling:
 
-| Feature | Supported? | Notes |
-| --- | --- | --- |
-| Type selectors (`hero`) | ✅ | Matches by element name supplied when querying. |
-| ID selectors (`button#counter-plus`) | ✅ | Each selector may include at most one `#id`. |
-| Class selectors (`tip.context`) | ✅ | Each selector may include at most one `.class`. |
-| Combined selectors (`hero.highlighted`) | ✅ | Element + optional ID + optional class. |
-| Descendant / combinators | ❌ | Not yet supported. |
-| Pseudo selectors | ❌ | Not supported. |
+| Feature                                 | Supported? | Notes                                           |
+| --------------------------------------- | ---------- | ----------------------------------------------- |
+| Type selectors (`hero`)                 | ✅         | Matches by element name supplied when querying. |
+| ID selectors (`button#counter-plus`)    | ✅         | Each selector may include at most one `#id`.    |
+| Class selectors (`tip.context`)         | ✅         | Each selector may include at most one `.class`. |
+| Combined selectors (`hero.highlighted`) | ✅         | Element + optional ID + optional class.         |
+| Descendant / combinators                | ❌         | Not yet supported.                              |
+| Pseudo selectors                        | ❌         | Not supported.                                  |
 
 Rules follow standard CSS precedence: IDs outrank classes, which outrank type selectors. When specificity ties, later rules win. The special `:root` selector is also supported; values defined there are merged into every computed style.
 
@@ -29,11 +29,11 @@ Rules follow standard CSS precedence: IDs outrank classes, which outrank type se
 
 The parser normalizes property names to lowercase and keeps values as strings, but the `ComputedStyle` helper exposes typed accessors:
 
-- `color("name")` parses named colors (`red`, `cyan`, `gray`), hex codes (`#04b5ff`, `#0bf`), or `rgb(r,g,b)`. Used for foreground/text colors and accent fills.
-- `bool("name")` interprets `true/false`, `yes/no`, `on/off`, `1/0`.
-- `u16("name")`, `f64("name")` parse numeric values for sizing.
-- `list_u16("name")` accepts whitespace- or comma-separated integers, handy for table column widths.
-- `text("name")` returns the raw string (useful for labels).
+-   `color("name")` parses named colors (`red`, `cyan`, `gray`), hex codes (`#04b5ff`, `#0bf`), or `rgb(r,g,b)`. Used for foreground/text colors and accent fills.
+-   `bool("name")` interprets `true/false`, `yes/no`, `on/off`, `1/0`.
+-   `u16("name")`, `f64("name")` parse numeric values for sizing.
+-   `list_u16("name")` accepts whitespace- or comma-separated integers, handy for table column widths.
+-   `text("name")` returns the raw string (useful for labels).
 
 Properties that begin with `--` are treated exactly like regular keys—the prefix simply keeps the CSS idiomatic and avoids clashing with built-in color names.
 
@@ -41,18 +41,18 @@ Properties that begin with `--` are treated exactly like regular keys—the pref
 
 The demo stylesheet (`examples/rustact-demo/styles/demo.css`) illustrates the selectors Rustact currently consumes:
 
-| Selector | Purpose | Properties read by the code |
-| --- | --- | --- |
-| `:root` | Global theme tokens shared via context. | `--accent-color`, `--warning-color`, `--success-color`, `--danger-color`, `--info-color` |
-| `hero` | Splash text block. | `color`, `--subtitle-color` |
-| `panel#counter` | Counter instructions. | `color` |
-| `button#counter-plus`, `button#counter-minus` | Counter buttons. | `accent-color`, `--filled` |
-| `gauge#counter-progress` | Counter progress bar. | `color`, `--label` |
-| `list#stats` | Recent events list. | `color`, `--highlight-color`, `--max-items` |
-| `table#services` | Service health table. | `--column-widths` |
-| `form#release` | Release checklist form. | `--label-width` |
-| `input`, `input#feedback-name` | Text inputs (global + per-field overrides). | `accent-color`, `--border-color`, `color`, `--placeholder-color`, `--background-color`, `--focus-background` |
-| `tip.keyboard`, `tip.mouse`, `tip.context` | Tip cards keyed by class. | `color` |
+| Selector                                      | Purpose                                     | Properties read by the code                                                                                  |
+| --------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `:root`                                       | Global theme tokens shared via context.     | `--accent-color`, `--warning-color`, `--success-color`, `--danger-color`, `--info-color`                     |
+| `hero`                                        | Splash text block.                          | `color`, `--subtitle-color`                                                                                  |
+| `panel#counter`                               | Counter instructions.                       | `color`                                                                                                      |
+| `button#counter-plus`, `button#counter-minus` | Counter buttons.                            | `accent-color`, `--filled`                                                                                   |
+| `gauge#counter-progress`                      | Counter progress bar.                       | `color`, `--label`                                                                                           |
+| `list#stats`                                  | Recent events list.                         | `color`, `--highlight-color`, `--max-items`                                                                  |
+| `table#services`                              | Service health table.                       | `--column-widths`                                                                                            |
+| `form#release`                                | Release checklist form.                     | `--label-width`                                                                                              |
+| `input`, `input#feedback-name`                | Text inputs (global + per-field overrides). | `accent-color`, `--border-color`, `color`, `--placeholder-color`, `--background-color`, `--focus-background` |
+| `tip.keyboard`, `tip.mouse`, `tip.context`    | Tip cards keyed by class.                   | `color`                                                                                                      |
 
 Add your own selectors and query them inside components by calling:
 
@@ -73,22 +73,22 @@ Validation logic can tint those inputs by pushing a [`FormFieldStatus`](https://
 
 ```css
 :root {
-  --accent-color: #00e8ff;
-  --warning-color: #f7b801;
-  --success-color: #7bd88f;
-  --danger-color: #ff6b6b;
-  --info-color: #7dd3fc;
+    --accent-color: #00e8ff;
+    --warning-color: #f7b801;
+    --success-color: #7bd88f;
+    --danger-color: #ff6b6b;
+    --info-color: #7dd3fc;
 }
 
 button#counter-plus {
-  accent-color: #5be7ff;
-  --filled: true;
+    accent-color: #5be7ff;
+    --filled: true;
 }
 
 gauge#counter-progress {
-  color: #5be7ff;
-  --label: "Momentum to ±10";
+    color: #5be7ff;
+    --label: "Momentum to ±10";
 }
 ```
 
-Save your changes and rerun `cargo run` from inside the example (`cd examples/rustact-demo && cargo run`) to see the new palette, copy, or sizing reflected in the terminal. Pair this reference with the [developer guide](/docs/guide/) and [tutorial](/docs/tutorial/) when styling your own applications.
+Save your changes and rerun `cargo run` from inside the example (`cd examples/rustact-demo && cargo run`)—or keep `RUSTACT_WATCH_STYLES=1 cargo run` active to watch the stylesheet live—for instant feedback on palette, copy, or sizing tweaks. Pair this reference with the [developer guide](/docs/guide/) and [tutorial](/docs/tutorial/) when styling your own applications.
