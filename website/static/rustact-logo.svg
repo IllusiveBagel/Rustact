@@ -1,0 +1,15 @@
+<svg width="480" height="80" viewBox="0 0 480 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="rustact-logo-title rustact-logo-desc">
+  <title id="rustact-logo-title">Rustact logotype</title>
+  <desc id="rustact-logo-desc">Wordmark displaying the text Rustact with a gradient that blends Rust orange into React cyan.</desc>
+  <defs>
+    <linearGradient id="rustact-gradient" x1="0" y1="0" x2="480" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c3402a" />
+      <stop offset="35%" stop-color="#f05d1f" />
+      <stop offset="65%" stop-color="#2fb9f2" />
+      <stop offset="100%" stop-color="#00bcd4" />
+    </linearGradient>
+  </defs>
+  <text x="50.3%" y="57%" text-anchor="middle" dominant-baseline="middle" font-family="'Now', 'Now Alt', 'Bebas Neue', 'Montserrat', sans-serif" font-size="92" font-weight="700" letter-spacing="0.08em" fill="url(#rustact-gradient)">
+    RUSTACT
+  </text>
+</svg>

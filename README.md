@@ -1,4 +1,6 @@
-# Rustact
+<p align="center">
+    <img src="website/static/rustact-logo.svg" alt="Rustact logo" width="640" />
+</p>
 
 [![CI](https://github.com/IllusiveBagel/rustact/actions/workflows/ci.yml/badge.svg)](https://github.com/IllusiveBagel/rustact/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/IllusiveBagel/rustact?include_prereleases&label=release)](https://github.com/IllusiveBagel/rustact/releases)
