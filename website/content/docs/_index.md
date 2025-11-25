@@ -8,8 +8,8 @@ paginate_by = 0
 
 Pick the track that matches what you need:
 
--   **Build** – start with the Tutorial for a fresh project or the Developer Guide if you are working inside the repo.
--   **Reference** – Architecture, Styling, and API Docs cover every exported type.
--   **Project** – Roadmap and Template docs explain where the library is headed and how to extend the starter kit.
+-   **Build** – use the combined Tutorial/Template quickstart for a fresh project or the Developer Guide if you are working inside the repo.
+-   **Reference** – Architecture, Styling, Widgets, and API Docs cover every exported type.
+-   **Project** – Roadmap explains where the library is headed and what’s planned next.
 
 Every link here opens directly—no more hopping between multiple pages.

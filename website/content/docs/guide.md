@@ -124,7 +124,7 @@ cd my-rustact-app
 cargo run
 ```
 
-The template lives under `templates/rustact-app/` and includes a sample component, stylesheet, and README. Adjust the [template guide](/docs/template/) as you evolve the scaffold.
+The template lives under `templates/rustact-app/` and includes a sample component, stylesheet, and README. Follow the combined [quickstart tutorial](/docs/tutorial/) whenever you evolve the scaffold.
 
 ## 9. Testing & troubleshooting
 

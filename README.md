@@ -127,11 +127,10 @@ Read `website/content/docs/styling.md` for the full selector/property reference 
 
 -   **Docs site** – https://illusivebagel.github.io/rustact (generated from `website/content/docs/**`).
 -   **website/content/docs/guide.md** – high-level overview, concepts, and workflows.
--   **website/content/docs/tutorial.md** – build-from-scratch walkthrough.
+-   **website/content/docs/tutorial.md** – template-powered quickstart and step-by-step tutorial.
 -   **website/content/docs/architecture.md** – runtime, hooks, renderer, and event bus deep dive.
 -   **website/content/docs/api-docs.md** – how the GitHub Pages workflow publishes `cargo doc`.
 -   **website/content/docs/roadmap.md** – prioritized features and milestones.
--   **website/content/docs/template.md** – expectations for template contributions.
 -   **examples/README.md** – describes each example crate and how to run it.
 -   **templates/rustact-app/** – starter project used by `cargo generate`.
 
