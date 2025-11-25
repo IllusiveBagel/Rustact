@@ -125,12 +125,14 @@ Read `website/content/docs/styling.md` for the full selector/property reference 
 
 ## Documentation & resources
 
--   **Docs site** – https://illusivebagel.github.io/rustact (generated from `website/content/docs/**`).
--   **website/content/docs/guide.md** – high-level overview, concepts, and workflows.
--   **website/content/docs/tutorial.md** – template-powered quickstart and step-by-step tutorial.
--   **website/content/docs/architecture.md** – runtime, hooks, renderer, and event bus deep dive.
--   **website/content/docs/api-docs.md** – how the GitHub Pages workflow publishes `cargo doc`.
--   **website/content/docs/roadmap.md** – prioritized features and milestones.
+-   **Docs site** – https://illusivebagel.github.io/rustact (root of every published guide).
+-   **Developer guide** – https://illusivebagel.github.io/rustact/docs/guide/ (high-level concepts and workflows).
+-   **Template quickstart & tutorial** – https://illusivebagel.github.io/rustact/docs/tutorial/ (generate a project and build a mini app step-by-step).
+-   **Architecture deep dive** – https://illusivebagel.github.io/rustact/docs/architecture/ (runtime, hooks, renderer, events).
+-   **Styling reference** – https://illusivebagel.github.io/rustact/docs/styling/ (selectors, properties, runtime integration).
+-   **Widget catalogue** – https://illusivebagel.github.io/rustact/docs/widgets/ (all built-in widgets, code, and screenshot guidance).
+-   **API publishing workflow** – https://illusivebagel.github.io/rustact/docs/api-docs/ (how GitHub Pages bundles `cargo doc`).
+-   **Roadmap** – https://illusivebagel.github.io/rustact/docs/roadmap/ (prioritized features and milestones).
 -   **examples/README.md** – describes each example crate and how to run it.
 -   **templates/rustact-app/** – starter project used by `cargo generate`.
 
